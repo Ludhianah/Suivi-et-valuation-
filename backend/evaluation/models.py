@@ -146,8 +146,7 @@ class Evaluation(models.Model):
         ordering = ['-annee', '-mois']
 
     def __str__(self):
-        return f"{self.id_employe.nom_complet} - {self.get_mois_display()} {self.annee}"
-
+        return f"{self.id_employe} - {self.get_mois_display()} {self.annee}"
     @property
     def note_globale(self):
         if self.note_sf is not None and self.note_se is not None:

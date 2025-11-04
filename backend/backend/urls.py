@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path,include
 from django.contrib.auth.models import User
 from rest_framework import routers, serializers, viewsets
+from employees.views import logout_view
 
 
 urlpatterns = [
@@ -28,5 +29,9 @@ urlpatterns = [
 # Additionally, we include login URLs for the browsable API.
 urlpatterns += [
     path('api/employees/', include('employees.urls')),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api/evaluation/', include('evaluation.urls')),
+    path('api/logout/', logout_view, name='logout'),
+    
+    
 ]
