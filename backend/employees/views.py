@@ -10,6 +10,7 @@ from rest_framework import viewsets
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 
+
 # Create your views here.
 
 @api_view(['POST'])
@@ -85,6 +86,7 @@ class DepartementViewSet(viewsets.ModelViewSet):
 class EmployeViewSet(viewsets.ModelViewSet):
     queryset = Employe.objects.all()
     serializer_class = EmployeSerializer
+    permission_classes = [AllowAny]
     
 # logout
 
