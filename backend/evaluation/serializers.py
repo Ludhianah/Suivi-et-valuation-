@@ -72,7 +72,7 @@ class EvaluationSFDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvaluationSFDetail
-        fields = ['id', 'id_sf', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
+        fields = ['id', 'id_evaluation', 'id_sf', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
         read_only_fields = ['note_ponderee', 'date_creation']
 
     def get_note_ponderee(self, obj):
@@ -91,24 +91,26 @@ class EvaluationSEDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvaluationSEDetail
-        fields = ['id', 'id_se', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
+        fields = ['id', 'id_evaluation', 'id_se', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
         read_only_fields = ['note_ponderee', 'date_creation']
 
     def get_note_ponderee(self, obj):
         return obj.note_ponderee
 
 
-# 5. Evaluation (MAINTENANT APRÈS les détails)
+# 8 . Evaluation (MAINTENANT APRÈS les détails)# evaluation/serializers.py
+
 class EvaluationSerializer(serializers.ModelSerializer):
     id_employe = serializers.PrimaryKeyRelatedField(
         queryset=Employe.objects.all(),
         required=True
     )
-    nom_employe = serializers.CharField(source='id_employe.nom_complet', read_only=True)
+    
+    # CORRIGÉ : utilise SerializerMethodField → SÛR À 100%
+    nom_employe = serializers.SerializerMethodField()
     mois_display = serializers.CharField(source='get_mois_display', read_only=True)
     note_globale = serializers.SerializerMethodField()
 
-    # Détails imbriqués (lecture seule)
     details_sf = EvaluationSFDetailSerializer(many=True, read_only=True)
     details_se = EvaluationSEDetailSerializer(many=True, read_only=True)
 
@@ -121,6 +123,10 @@ class EvaluationSerializer(serializers.ModelSerializer):
             'details_sf', 'details_se'
         ]
         read_only_fields = ['note_sf', 'note_se', 'note_globale', 'date_creation', 'date_modification']
+
+    # MÉTHODE SÛRE
+    def get_nom_employe(self, obj):
+        return str(obj.id_employe)  # Utilise __str__ de Employe
 
     def get_note_globale(self, obj):
         return obj.note_globale
