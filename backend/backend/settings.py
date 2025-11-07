@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'employees',
     'evaluation',
     'rest_framework',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -131,4 +132,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
+}
+
+GRAPH_MODELS = {
+    'all_applications': True,
+    'group_models': True,
 }
