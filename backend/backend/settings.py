@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'evaluation',
     'rest_framework',
     'django_extensions',
-    'auth',
+    'authentication',  # Ajout de l'application d'authentification personnalisée
+    
 ]
 
 MIDDLEWARE = [
@@ -133,4 +134,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
+}
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
 }
