@@ -88,16 +88,4 @@ class EmployeViewSet(viewsets.ModelViewSet):
     queryset = Employe.objects.all()
     serializer_class = EmployeSerializer
     permission_classes = [AllowAny]
-    
-# logout
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def logout_view(request):
-    try:
-        refresh_token = request.data["refresh"]
-        token = RefreshToken(refresh_token)
-        token.blacklist()  # Invalide le token
-        return Response({"message": "Logout réussi"}, status=205)
-    except Exception as e:
-        return Response({"error": str(e)}, status=400)    
+  
