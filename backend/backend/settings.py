@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'evaluation',
     'rest_framework',
     'django_extensions',
+    'auth',
 ]
 
 MIDDLEWARE = [
