@@ -171,8 +171,7 @@ def evaluation_api(request, pk=None):
     if request.method == 'GET':
         if pk:
             try:
-                obj = Evaluation.objects.select_related('id_employe') \
-                    .prefetch_related('details_sf', 'details_se').get(pk=pk)
+                obj = Evaluation.objects.select_related('id_employe').prefetch_related('id_detail_sf', 'id_detail_se').get(pk=pk)              
                 serializer = EvaluationSerializer(obj)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Evaluation.DoesNotExist:
@@ -182,7 +181,7 @@ def evaluation_api(request, pk=None):
                 )
         else:
             qs = Evaluation.objects.select_related('id_employe') \
-                .prefetch_related('details_sf', 'details_se').all()
+                .prefetch_related('id_detail_sf', 'id_detail_se').all()
             serializer = EvaluationSerializer(qs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 

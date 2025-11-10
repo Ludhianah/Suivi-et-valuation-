@@ -1,8 +1,8 @@
-import "@mantine/core/styles.css";
-import { MantineProvider } from "@mantine/core";
-import { shadcnCssVariableResolver } from "./cssVariableResolver.ts";
-import { shadcnTheme } from "./theme.ts";
-import "./styles.css";
+import "@mantine/core/styles.css"; // Importer le style de base de Mantine
+import { MantineProvider } from "@mantine/core"; // Fournisseur de thème Mantine
+import { shadcnCssVariableResolver } from "./cssVariableResolver.ts"; // Résolveur de variables CSS personnalisé utilisé par Mantine Hub
+import { shadcnTheme } from "./theme.ts"; // Thème personnalisé utilisé par Mantine Hub
+import "./styles.css"; // Importer les styles globaux personnalisés
 import { useState } from "react";
 import UserForm from "./components/users/user-create.jsx";
 import UserList from "./components/users/user-list.jsx";

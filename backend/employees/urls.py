@@ -6,7 +6,7 @@ from .views import DepartementViewSet, EmployeViewSet
 
 router = DefaultRouter()
 router.register(r'departements', DepartementViewSet)
-router.register(r'employes', EmployeViewSet)
+router.register(r'', EmployeViewSet)
 
 urlpatterns = [
     path('create_user/', create_user, name='create_user'),

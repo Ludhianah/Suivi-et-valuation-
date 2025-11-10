@@ -72,7 +72,7 @@ class EvaluationSFDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvaluationSFDetail
-        fields = ['id', 'id_evaluation', 'id_sf', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
+        fields = ['id',  'id_sf', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
         read_only_fields = ['note_ponderee', 'date_creation']
 
     def get_note_ponderee(self, obj):
@@ -91,7 +91,7 @@ class EvaluationSEDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvaluationSEDetail
-        fields = ['id', 'id_evaluation', 'id_se', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
+        fields = ['id', 'id_se', 'nom_indicateur', 'poids', 'note', 'commentaire', 'note_ponderee', 'date_creation']
         read_only_fields = ['note_ponderee', 'date_creation']
 
     def get_note_ponderee(self, obj):
@@ -106,27 +106,33 @@ class EvaluationSerializer(serializers.ModelSerializer):
         required=True
     )
     
-    # CORRIGÉ : utilise SerializerMethodField → SÛR À 100%
     nom_employe = serializers.SerializerMethodField()
     mois_display = serializers.CharField(source='get_mois_display', read_only=True)
     note_globale = serializers.SerializerMethodField()
 
-    details_sf = EvaluationSFDetailSerializer(many=True, read_only=True)
-    details_se = EvaluationSEDetailSerializer(many=True, read_only=True)
+    # ❌ WRONG if id_detail_sf is a ForeignKey (single object)
+    # id_detail_sf = EvaluationSFDetailSerializer(many=True, read_only=True)
+    # id_detail_se = EvaluationSEDetailSerializer(many=True, read_only=True)
+
+    # ✅ CORRECT if it's a single related object:
+    id_detail_sf = EvaluationSFDetailSerializer(read_only=True)
+    id_detail_se = EvaluationSEDetailSerializer(read_only=True)
 
     class Meta:
         model = Evaluation
         fields = [
-            'id', 'id_employe', 'nom_employe', 'annee', 'mois', 'mois_display',
-            'note_sf', 'note_se', 'note_globale', 'commentaire',
-            'date_creation', 'date_modification',
-            'details_sf', 'details_se'
+            'annee',
+            'mois',
+            'id_employe',
+            'nom_employe',
+            'mois_display',
+            'note_globale',
+            'id_detail_sf',
+            'id_detail_se',
         ]
-        read_only_fields = ['note_sf', 'note_se', 'note_globale', 'date_creation', 'date_modification']
 
-    # MÉTHODE SÛRE
     def get_nom_employe(self, obj):
-        return str(obj.id_employe)  # Utilise __str__ de Employe
+        return str(obj.id_employe)
 
     def get_note_globale(self, obj):
         return obj.note_globale

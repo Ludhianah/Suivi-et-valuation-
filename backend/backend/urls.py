@@ -34,4 +34,5 @@ urlpatterns += [
     path('api/logout/', logout_view, name='logout'),
     
     
+    
 ]

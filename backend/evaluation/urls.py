@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     # IndicateurSF
-    path('indicateurs-sf/', views.indicateur_sf_api, name='indicateursf-list'),
+    path('indicateurs-sf', views.indicateur_sf_api, name='indicateursf-list'),
     path('indicateurs-sf/<int:pk>/', views.indicateur_sf_api, name='indicateursf-detail'),
 
     # SavoirFaire

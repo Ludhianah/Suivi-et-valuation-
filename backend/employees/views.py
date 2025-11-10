@@ -82,6 +82,7 @@ def list_departements(request):
 class DepartementViewSet(viewsets.ModelViewSet):
     queryset = Departement.objects.all()
     serializer_class = DepartementSerializer
+    permission_classes = [AllowAny]
 
 class EmployeViewSet(viewsets.ModelViewSet):
     queryset = Employe.objects.all()

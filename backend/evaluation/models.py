@@ -182,14 +182,15 @@ class Evaluation(models.Model):
     mois = models.IntegerField(choices=MOIS_CHOICES, verbose_name="Mois")
     
     # 🔸 Nouvelles relations 1-1 vers les détails
-    detail_se = models.ForeignKey(
+    id_detail_se = models.OneToOneField(
         EvaluationSEDetail,
         on_delete=models.CASCADE,
         related_name='evaluation_se',
         null=True,
         blank=True
     )
-    detail_sf = models.ForeignKey(
+    
+    id_detail_sf = models.OneToOneField(
         EvaluationSFDetail,
         on_delete=models.CASCADE,
         related_name='evaluation_sf',
