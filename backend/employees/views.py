@@ -2,90 +2,81 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from .serializers import UserSerializer
 from django.contrib.auth.models import User
 from .models import Departement, Employe
-from .serializers import DepartementSerializer, EmployeSerializer
-from rest_framework import viewsets
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from .serializers import UserSerializer, DepartementSerializer, EmployeSerializer
 
 
-# Create your views here.
+# ===============================
+# 🔹 USERS
+# ===============================
 
-@api_view(['POST'])
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
-def create_user(request):
-    if request.method == 'POST':
+def users_list_create(request):
+    """
+    ✅ Lister tous les utilisateurs (GET)
+    ✅ Créer un nouvel utilisateur (POST)
+    URL : /api/users/
+    """
+    if request.method == 'GET':
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-@api_view(['GET'])
+
+
+# ===============================
+# 🔹 EMPLOYÉS
+# ===============================
+
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
-# Récupérer la liste des utilisateurs
-def list_users(request):
+def employees_list_create(request):
+    """
+    ✅ Lister tous les employés (GET)
+    ✅ Créer un nouvel employé (POST)
+    URL : /api/employees/
+    """
     if request.method == 'GET':
-        # Récupérer tous les utilisateurs
-        users = User.objects.all()
-        
-        # Sérialiser les données des utilisateurs 
-        serializer = UserSerializer(users, many=True)
-        
-        # Retourner la réponse avec les données sérialisées
-        return Response(serializer.data)        
-    
-    
-# Créer un employé
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def create_employe(request):
-    if request.method == 'POST':
+        employes = Employe.objects.all()
+        serializer = EmployeSerializer(employes, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
         serializer = EmployeSerializer(data=request.data)
         if serializer.is_valid():
             employe = serializer.save()
             return Response(EmployeSerializer(employe).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# Lister tous les employés
-@api_view(['GET'])
+
+
+# ===============================
+# 🔹 DÉPARTEMENTS
+# ===============================
+
+@api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
-def list_employes(request):
+def departements_list_create(request):
+    """
+    ✅ Lister tous les départements (GET)
+    ✅ Créer un nouveau département (POST)
+    URL : /api/departements/
+    """
     if request.method == 'GET':
-        employes = Employe.objects.all()
-        serializer = EmployeSerializer(employes, many=True)
+        departements = Departement.objects.all()
+        serializer = DepartementSerializer(departements, many=True)
         return Response(serializer.data)
-# Créer un département
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def create_departement(request):
-    if request.method == 'POST':
+
+    elif request.method == 'POST':
         serializer = DepartementSerializer(data=request.data)
         if serializer.is_valid():
             departement = serializer.save()
             return Response(DepartementSerializer(departement).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# Lister tous les départements
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def list_departements(request):
-    if request.method == 'GET':
-        departements = Departement.objects.all()
-        serializer = DepartementSerializer(departements, many=True)
-        return Response(serializer.data)
-    
-# ViewSets pour DRF Router
-
-
-class DepartementViewSet(viewsets.ModelViewSet):
-    queryset = Departement.objects.all()
-    serializer_class = DepartementSerializer
-    permission_classes = [AllowAny]
-
-class EmployeViewSet(viewsets.ModelViewSet):
-    queryset = Employe.objects.all()
-    serializer_class = EmployeSerializer
-    permission_classes = [AllowAny]
-  
