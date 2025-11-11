@@ -1,15 +1,13 @@
-from .views import create_user, list_users
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import DepartementViewSet, EmployeViewSet
-
-
-router = DefaultRouter()
-router.register(r'departements', DepartementViewSet)
-router.register(r'', EmployeViewSet)
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('create_user/', create_user, name='create_user'),
-    path('list_users/', list_users, name='list_users'),
-    path('', include(router.urls)),
+    # 🔹 USERS
+    path('users/', views.users_list_create, name='users_list_create'),
+
+    # 🔹 EMPLOYÉS
+    path('employees/', views.employees_list_create, name='employees_list_create'),
+
+    # 🔹 DÉPARTEMENTS
+    path('departements/', views.departements_list_create, name='departements_list_create'),
 ]

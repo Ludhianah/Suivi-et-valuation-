@@ -28,7 +28,7 @@ urlpatterns = [
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns += [
-    path('api/employees/', include('employees.urls')),
+    path('api/', include('employees.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/evaluation/', include('evaluation.urls')),
     path('api/auth/', include('authentication.urls')),  # toutes les URLs de login/logout
