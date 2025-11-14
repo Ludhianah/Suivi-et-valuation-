@@ -37,9 +37,9 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-indigo-50">
       <div className="w-full max-w-sm p-8 bg-white rounded-2xl shadow-xl">
-        
+
         <h2 className="text-2xl font-bold text-gray-800 mb-7 text-center">
-          Bienvenue <span className="text-blue-600">👋</span>
+          connexion <span className="text-blue-600">👋</span>
         </h2>
 
         {/* =======================
@@ -87,14 +87,16 @@ function LoginForm() {
           >
             Mot de passe oublié ?
           </a>
-          {/* 🔹 Lien vers /register */}
+          {/* Espace + soulignement + lien "S'inscrire" */}
+          <span className="mx-2"></span>
           <span
             onClick={() => navigate("/register")}
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors"
+             className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors underline"
           >
             S'inscrire
           </span>
         </div>
+
       </div>
     </div>
   );
