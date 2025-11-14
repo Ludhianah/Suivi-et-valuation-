@@ -1,25 +1,21 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./components/Login"; // ton LoginForm
-import Home from "./pages/Home";       // Home simple
-import Sidebar from "./components/Sidebar"; // ✅ Import de la Sidebar
-import Register from "./pages/Register"; // chemin relatif vers ton fichier Register.jsx
-import Departement from "./pages/Departement";//importation de la page Departement
-import SavoirFaire from "./pages/SavoirFaire";//importation de la page SavoirFaire
-import SavoirEtre from "./pages/SavoirEtre";//importation de la page SavoirEtre
-import Evaluation from "./pages/Evaluation";//importation de la page Evaluation
-
+import Login from "./components/Login";
+import Home from "./pages/Home";
+import Sidebar from "./components/Sidebar";
+import Register from "./pages/Register";
+import Departement from "./pages/Departement";
+import SavoirFaire from "./pages/SavoirFaire";
+import SavoirEtre from "./pages/SavoirEtre";
+import Evaluation from "./pages/Evaluation";
 import ProtectedRoute from "./security/ProtectedRoute";
 import PublicRoute from "./security/PublicRoute";
-
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Page par défaut → redirige vers /login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Route publique */}
         <Route
           path="/login"
           element={
@@ -28,7 +24,7 @@ function App() {
             </PublicRoute>
           }
         />
-        {/* ✅ Route publique : inscription */}
+
         <Route
           path="/register"
           element={
@@ -38,78 +34,79 @@ function App() {
           }
         />
 
-        {/* Route protégée */}
+        {/* Layout commun pour les routes protégées */}
         <Route
           path="/home"
           element={
             <ProtectedRoute>
-              {/* ✅ Ici, on affiche la Sidebar et la page Home côte à côte */}
-              <div className="flex">
-                {/* Sidebar à gauche */}
+              <div className="flex h-screen">
                 <Sidebar />
-                <Home />
+                <div className="flex-1 overflow-auto p-4">
+                  <Home />
+                </div>
               </div>
             </ProtectedRoute>
           }
         />
-
 
         <Route
           path="/departement"
           element={
             <ProtectedRoute>
-              {/* ✅ Ici, on affiche la Sidebar et la page Home côte à côte */}
-              <div className="flex">
-                {/* Sidebar à gauche */}
+              <div className="flex h-screen">
                 <Sidebar />
-                <Departement />
+                <div className="flex-1 overflow-auto p-4">
+                  <Departement />
+                </div>
               </div>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/savoir-faire"
           element={
             <ProtectedRoute>
-              {/* ✅ Ici, on affiche la Sidebar et la page Home côte à côte */}
-              <div className="flex">
-                {/* Sidebar à gauche */}
+              <div className="flex h-screen">
                 <Sidebar />
-                <SavoirFaire />
+                <div className="flex-1 overflow-auto p-4">
+                  <SavoirFaire />
+                </div>
               </div>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/savoir-etre"
           element={
             <ProtectedRoute>
-              {/* ✅ Ici, on affiche la Sidebar et la page Home côte à côte */}
-              <div className="flex">
-                {/* Sidebar à gauche */}
+              <div className="flex h-screen">
                 <Sidebar />
-                <SavoirEtre />
+                <div className="flex-1 overflow-auto p-4">
+                  <SavoirEtre />
+                </div>
               </div>
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/evaluation"
           element={
             <ProtectedRoute>
-              {/* ✅ Ici, on affiche la Sidebar et la page Home côte à côte */}
-              <div className="flex">
-                {/* Sidebar à gauche */}
+              <div className="flex h-screen">
                 <Sidebar />
-                <Evaluation />
+                <div className="flex-1 overflow-auto p-4">
+                  <Evaluation />
+                </div>
               </div>
             </ProtectedRoute>
           }
         />
-        {/* Page 404 → redirige vers /login */}
+
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-
     </Router>
   );
 }
