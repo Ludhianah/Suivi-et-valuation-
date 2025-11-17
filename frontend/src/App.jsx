@@ -7,6 +7,7 @@ import Departement from "./pages/Departement";
 import SavoirFaire from "./pages/SavoirFaire";
 import SavoirEtre from "./pages/SavoirEtre";
 import Evaluation from "./pages/Evaluation";
+import Layout from "./components/Layout";
 import ProtectedRoute from "./security/ProtectedRoute";
 import PublicRoute from "./security/PublicRoute";
 
@@ -39,16 +40,12 @@ function App() {
           path="/home"
           element={
             <ProtectedRoute>
-              <div className="flex h-screen">
-                <Sidebar />
-                <div className="flex-1 overflow-auto p-4">
-                  <Home />
-                </div>
-              </div>
+              <Layout>
+                <Home />
+              </Layout>
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/departement"
           element={
