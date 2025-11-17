@@ -88,7 +88,7 @@ function LoginForm() {
             Mot de passe oublié ?
           </a>
           {/* Espace + soulignement + lien "S'inscrire" */}
-          <span className="mx-2"></span>
+          <span className="mx-1"></span>
           <span
             onClick={() => navigate("/register")}
              className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors underline"
