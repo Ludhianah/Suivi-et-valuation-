@@ -118,7 +118,7 @@ const Sidebar = () => {
             <div className="p-2 border-t border-gray-200">
 
                 {/* Tooltip visible seulement quand sidebar réduite */}
-                <Tooltip label={collapsed ? "Déconnexion" : null} position="right" withArrow>
+                <div label={collapsed ? "Déconnexion" : null} position="right" withArrow>
                     <Button
                         leftSection={<IconLogout size={20} />}
                         variant="subtle"
@@ -129,7 +129,7 @@ const Sidebar = () => {
                         {/* Texte visible uniquement en mode non réduit */}
                         {!collapsed && "Déconnexion"}
                     </Button>
-                </Tooltip>
+                </div>
             </div>
         </div>
     );
