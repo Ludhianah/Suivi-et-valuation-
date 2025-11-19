@@ -15,17 +15,6 @@ export const isAuthenticated = () => {
   const token = localStorage.getItem('access');
   if (!token) return false;
 
-  const payload = decodeToken(token);
-  if (!payload) return false;
-
-  // Vérifie l'expiration (exp = timestamp en secondes)
-  const isExpired = payload.exp * 1000 < Date.now();
-  if (isExpired) {
-    localStorage.removeItem('access');
-    localStorage.removeItem('refresh');
-    return false;
-  }
-
   return true;
 };
 
