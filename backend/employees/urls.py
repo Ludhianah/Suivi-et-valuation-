@@ -10,4 +10,7 @@ urlpatterns = [
 
     # 🔹 DÉPARTEMENTS
     path('departements/', views.departements_list_create, name='departements_list_create'),
+    
+    # Récupérer, modifier, supprimer
+    path('departements/<int:pk>/', views.departement_detail, name='departement_detail'),
 ]
