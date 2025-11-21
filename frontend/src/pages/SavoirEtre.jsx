@@ -95,11 +95,12 @@ const SavoirEtre = () => {
   };
 
   return (
-    <Paper withBorder shadow="sm" p="md" className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-white p-6">
       <LoadingOverlay visible={loading} overlayBlur={2} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <Title order={2} className="text-gray-800">
+      {/* En-tête */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+        <Title order={2} className="text-gray-800 font-medium">
           Savoir-Être
         </Title>
         <Button
@@ -108,7 +109,8 @@ const SavoirEtre = () => {
             setOpened(true);
           }}
           leftSection={<IconPlus size={16} />}
-          className="bg-blue-600 hover:bg-blue-700 transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 transition-colors text-white"
+          radius="md"
         >
           Ajouter
         </Button>
@@ -116,35 +118,38 @@ const SavoirEtre = () => {
 
       {/* Tableau */}
       <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
-        <Table striped highlightOnHover withTableBorder>
+        <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th className="font-semibold text-gray-700">Indicateur</Table.Th>
-              <Table.Th className="font-semibold text-gray-700">Poids (%)</Table.Th>
-              <Table.Th className="font-semibold text-gray-700">Actions</Table.Th>
+              <Table.Th className="font-medium text-gray-600">Indicateur</Table.Th>
+              <Table.Th className="font-medium text-gray-600">Poids (%)</Table.Th>
+              <Table.Th className="font-medium text-gray-600 text-center">Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {savoirEtres.length > 0 ? (
               savoirEtres.map((se) => (
-                <Table.Tr key={se.id} className="hover:bg-gray-50 transition-colors">
-                  <Table.Td>{se.nom_indicateur}</Table.Td>
-                  <Table.Td>{se.poids_pourcentage}</Table.Td>
-                  <Table.Td>
-                    <Group gap="xs" justify="center">
+                <Table.Tr
+                  key={se.id}
+                  className="hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <Table.Td className="text-gray-700">{se.nom_indicateur}</Table.Td>
+                  <Table.Td className="text-gray-700">{se.poids_pourcentage}</Table.Td>
+                  <Table.Td className="text-center">
+                    <Group spacing={0} position="center">
                       <ActionIcon
-                        variant="filled"
-                        color="yellow"
+                        variant="subtle"
+                        color="blue"
                         onClick={() => handleEdit(se)}
-                        className="hover:scale-105 transition-transform"
+                        className="p-0 hover:bg-blue-50 transition-colors"
                       >
                         <IconEdit style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
                       <ActionIcon
-                        variant="filled"
+                        variant="subtle"
                         color="red"
                         onClick={() => handleDeleteClick(se.id)}
-                        className="hover:scale-105 transition-transform"
+                        className="p-0 hover:bg-red-50 transition-colors"
                       >
                         <IconTrash style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
@@ -154,7 +159,7 @@ const SavoirEtre = () => {
               ))
             ) : (
               <Table.Tr>
-                <Table.Td colSpan={3} align="center" className="py-4 text-gray-500">
+                <Table.Td colSpan={3} align="center" className="py-6 text-gray-400">
                   Aucun Savoir-Être trouvé
                 </Table.Td>
               </Table.Tr>
@@ -167,10 +172,16 @@ const SavoirEtre = () => {
       <Modal
         opened={opened}
         onClose={resetForm}
-        title={<Title order={4} className="text-gray-800">{editId ? "Modifier le Savoir-Être" : "Ajouter un Savoir-Être"}</Title>}
+        title={
+          <Title order={4} className="text-gray-800 font-medium">
+            {editId ? "Modifier le Savoir-Être" : "Ajouter un Savoir-Être"}
+          </Title>
+        }
         centered
+        radius="md"
+        shadow="lg"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <TextInput
             label="Nom de l'indicateur"
             placeholder="Nom de l'indicateur"
@@ -178,6 +189,7 @@ const SavoirEtre = () => {
             onChange={(e) => setNomIndicateur(e.target.value)}
             required
             className="w-full"
+            radius="md"
           />
           <TextInput
             label="Poids (%)"
@@ -189,18 +201,29 @@ const SavoirEtre = () => {
             type="number"
             min="0"
             max="100"
+            radius="md"
           />
           <Group justify="flex-end" mt="md">
-            <Button type="button" variant="outline" onClick={resetForm} className="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetForm}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              radius="md"
+            >
               Annuler
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 transition-colors">
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 transition-colors text-white"
+              radius="md"
+            >
               {editId ? "Modifier" : "Ajouter"}
             </Button>
           </Group>
         </form>
       </Modal>
-    </Paper>
+    </div>
   );
 };
 

@@ -8,10 +8,10 @@ import {
   ActionIcon,
   Modal,
   rem,
+  Box,
+  Flex,
 } from "@mantine/core";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
-
-// 🔹 Import des fonctions du service pour gérer les départements
+import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
 import {
   getDepartements,
   createDepartement,
@@ -20,139 +20,152 @@ import {
 } from "../services/departementService";
 
 const Departement = () => {
-  // 🔹 États du composant
-  const [departements, setDepartements] = useState([]); // liste des départements
-  const [nom, setNom] = useState(""); // nom du département en cours d'ajout/modification
-  const [editId, setEditId] = useState(null); // id du département en modification
-  const [opened, setOpened] = useState(false); // état du modal (ouvert/fermé)
+  const [departements, setDepartements] = useState([]);
+  const [nom, setNom] = useState("");
+  const [editId, setEditId] = useState(null);
+  const [opened, setOpened] = useState(false);
 
-  // 🔹 Fonction pour récupérer les départements depuis l'API
   const fetchData = async () => {
     try {
       const data = await getDepartements();
-      setDepartements(data); // mise à jour du state avec les départements récupérés
+      setDepartements(data);
     } catch (error) {
       console.error("Erreur chargement départements :", error);
     }
   };
 
-  // 🔹 useEffect pour charger les départements au montage du composant
   useEffect(() => {
     fetchData();
   }, []);
 
-  // 🔹 Fonction pour gérer l'ajout ou la modification d'un département
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nom.trim()) return; // éviter les noms vides
-
+    if (!nom.trim()) return;
     try {
       if (editId) {
-        // 🔸 Modification
         await updateDepartement(editId, { nom_departement: nom });
       } else {
-        // 🔸 Ajout
         await createDepartement({ nom_departement: nom });
       }
-      setNom(""); // réinitialisation du champ
-      setEditId(null); // réinitialisation de l'état d'édition
-      fetchData(); // recharger la liste
-      setOpened(false); // fermer le modal
+      setNom("");
+      setEditId(null);
+      fetchData();
+      setOpened(false);
     } catch (error) {
       console.error("Erreur lors de la sauvegarde :", error);
     }
   };
 
-  // 🔹 Préparer le modal pour la modification d'un département
   const handleEdit = (item) => {
-    setEditId(item.id); // enregistrer l'id du département à modifier
-    setNom(item.nom_departement); // remplir le champ avec le nom existant
-    setOpened(true); // ouvrir le modal
+    setEditId(item.id);
+    setNom(item.nom_departement);
+    setOpened(true);
   };
 
-  // 🔹 Supprimer un département
   const handleDeleteClick = async (id) => {
-    if (!window.confirm("Supprimer ce département ?")) return; // confirmation
-
+    if (!window.confirm("Supprimer ce département ?")) return;
     try {
       await deleteDepartement(id);
-      fetchData(); // recharger la liste après suppression
+      fetchData();
     } catch (error) {
       console.error("Erreur suppression :", error);
     }
   };
 
   return (
-    <div className="p-4">
-      {/* Titre de la page */}
-      <Title order={2} className="mb-4">Départements</Title>
+    <Box className="p-6 bg-white min-h-screen">
+      {/* En-tête avec titre et bouton "Ajouter" */}
+      <Flex justify="space-between" align="center" mb="lg">
+        <Title order={2} className="text-gray-800">
+          Départements
+        </Title>
+        <Button
+          onClick={() => {
+            setEditId(null);
+            setNom("");
+            setOpened(true);
+          }}
+          leftSection={<IconPlus size={16} />}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          Ajouter
+        </Button>
+      </Flex>
 
-      {/* Bouton pour ouvrir le modal d'ajout */}
-      <Button
-        onClick={() => {
-          setEditId(null); // mode ajout
-          setNom(""); // réinitialiser le champ
-          setOpened(true); // ouvrir le modal
-        }}
-        className="mb-4 bg-blue-600 hover:bg-blue-700"
-      >
-        Ajouter un département
-      </Button>
+      {/* Tableau des départements */}
+      <Box className="rounded-lg shadow-sm overflow-hidden">
+        <Table striped highlightOnHover withTableBorder>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th className="font-semibold text-gray-700">Département</Table.Th>
+              <Table.Th className="font-semibold text-gray-700">Créé le</Table.Th>
+              <Table.Th
+                className="font-semibold text-gray-700 text-center"
+                style={{ textAlign: 'center', width: '120px' }}
+              >
+                Actions
+              </Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {departements.map((d) => (
+              <Table.Tr key={d.id}>
+                <Table.Td>{d.nom_departement}</Table.Td>
+                <Table.Td>{new Date(d.date_creation).toLocaleDateString()}</Table.Td>
+                <Table.Td style={{ textAlign: 'center', width: '120px' }}>
+                  <Group gap="xs" justify="center">
+                   <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleEdit(d)}
+                        className="p-0 hover:bg-blue-50 transition-colors"
+                      >
+                        <IconEdit style={{ width: rem(16), height: rem(16) }} />
+                      </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      onClick={() => handleDeleteClick(d.id)}
+                      className="hover:bg-red-100"
+                    >
+                      <IconTrash style={{ width: rem(16), height: rem(16) }} />
+                    </ActionIcon>
+                  </Group>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </Box>
 
-      {/* Modal pour ajouter ou modifier un département */}
+      {/* Modal pour ajouter/modifier */}
       <Modal
         opened={opened}
         onClose={() => setOpened(false)}
         title={editId ? "Modifier le département" : "Ajouter un département"}
+        centered
+        overlayProps={{ opacity: 0.55, blur: 3 }}
       >
         <form onSubmit={handleSubmit}>
           <TextInput
             label="Nom du département"
-            placeholder="Nom du département"
+            placeholder="Ex: Informatique"
             value={nom}
             onChange={(e) => setNom(e.target.value)}
             required
             className="mb-4"
           />
           <Group justify="flex-end" mt="md">
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {editId ? "Modifier" : "Ajouter"}
             </Button>
           </Group>
         </form>
       </Modal>
-
-      {/* Tableau affichant la liste des départements */}
-      <Table striped highlightOnHover withTableBorder>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Département</Table.Th>
-            <Table.Th>Créé le</Table.Th>
-            <Table.Th>Actions</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {departements.map((d) => (
-            <Table.Tr key={d.id}>
-              <Table.Td>{d.nom_departement}</Table.Td>
-              <Table.Td>{new Date(d.date_creation).toLocaleDateString()}</Table.Td>
-              <Table.Td>
-                <Group gap="xs" justify="center">
-                  {/* Bouton pour modifier */}
-                  <ActionIcon variant="filled" color="yellow" onClick={() => handleEdit(d)}>
-                    <IconEdit style={{ width: rem(16), height: rem(16) }} />
-                  </ActionIcon>
-                  {/* Bouton pour supprimer */}
-                  <ActionIcon variant="filled" color="red" onClick={() => handleDeleteClick(d.id)}>
-                    <IconTrash style={{ width: rem(16), height: rem(16) }} />
-                  </ActionIcon>
-                </Group>
-              </Table.Td>
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </div>
+    </Box>
   );
 };
 

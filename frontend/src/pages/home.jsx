@@ -6,9 +6,7 @@ import {
   Text,
   Card,
   Grid,
-  Badge,
   Group,
-  ActionIcon,
   Avatar,
   Stack,
   Paper,
@@ -17,18 +15,16 @@ import {
 } from "@mantine/core";
 import {
   IconClipboardList,
-  IconUsers,
-  IconFileAnalytics,
-  IconCalendarEvent,
+  IconBook,
+  IconUserCheck,
+  IconBuilding,
   IconTrendingUp,
-  IconTarget,
 } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const navigate = useNavigate();
 
-  // Protection simple (comme toi)
   useEffect(() => {
     const token = localStorage.getItem("access");
     if (!token) navigate("/login");
@@ -36,41 +32,41 @@ const Home = () => {
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
+  // *** 4 CARTES, AVEC DEPARTEMENT AJOUTÉ ***
   const quickActions = [
     {
-      title: "Nouvelle Évaluation",
-      icon: IconClipboardList,
+      title: "Savoir-Faire",
+      icon: IconBook,
       color: "blue",
-      badge: "Populaire",
-      path: "/evaluations/nouveau",
-      desc: "Démarrer l’évaluation du mois en cours",
+      path: "/savoir-faire",
+      desc: "Compétences techniques et maîtrise des tâches.",
     },
     {
-      title: "Mes Évaluations",
-      icon: IconCalendarEvent,
-      color: "teal",
-      path: "/evaluations",
-      desc: "Voir et modifier vos évaluations",
+      title: "Savoir-Être",
+      icon: IconUserCheck,
+      color: "green",
+      path: "/savoir-etre",
+      desc: "Attitudes professionnelles et comportements valorisés.",
     },
     {
-      title: "Liste des Employés",
-      icon: IconUsers,
+      title: "Évaluation",
+      icon: IconClipboardList,
       color: "violet",
-      path: "/employes",
-      desc: "Consulter le profil de chaque collaborateur",
+      path: "/evaluation",
+      desc: "Résumé global des performances mensuelles.",
     },
     {
-      title: "Rapports & Statistiques",
-      icon: IconFileAnalytics,
+      title: "Département",
+      icon: IconBuilding,
       color: "orange",
-      path: "/rapports",
-      desc: "Exporter en PDF ou Excel",
+      path: "/departement",
+      desc: "Gérer les départements et leur structure.",
     },
   ];
 
   return (
-    <Container size="xl" py="xl">
-      {/* Bienvenue personnalisée */}
+    <Container size="lg" py="xl">
+      {/* Bienvenue */}
       <Stack gap="md" mb="xl">
         <Group align="center">
           <Avatar size="lg" color="blue" radius="xl">
@@ -84,31 +80,35 @@ const Home = () => {
       </Stack>
 
       {/* Cartes principales */}
-      <Grid gutter="xl">
+      <Grid justify="center" gutter="lg">
         {quickActions.map((action) => (
-          <Grid.Col span={{ base: 12, sm: 6, lg: 3 }} key={action.title}>
+          <Grid.Col
+            span={{ base: 12, sm: 6, lg: 3 }}
+            key={action.title}
+            style={{ display: "flex", justifyContent: "center" }} // CENTRER LES CARTES
+          >
             <Card
               shadow="md"
               radius="lg"
               padding="xl"
-              className="h-full hover:shadow-xl transition-all cursor-pointer border"
               withBorder
               onClick={() => navigate(action.path)}
+              className="hover:shadow-xl transition-all cursor-pointer"
+              style={{
+                width: "100%",
+                maxWidth: "350px", // RÉTRÉCIT LES CARTES
+              }}
             >
               <Group justify="space-between" mb="sm">
                 <ThemeIcon size={50} radius="xl" color={action.color} variant="light">
                   <action.icon size={28} />
                 </ThemeIcon>
-                {action.badge && (
-                  <Badge color="pink" variant="filled" size="sm">
-                    {action.badge}
-                  </Badge>
-                )}
               </Group>
 
               <Title order={4} fw={700} mt="md">
                 {action.title}
               </Title>
+
               <Text size="sm" c="dimmed" mt={6}>
                 {action.desc}
               </Text>
@@ -117,14 +117,16 @@ const Home = () => {
         ))}
       </Grid>
 
-      {/* Section stats rapide (le jury adore ça) */}
-      <Paper withBorder radius="lg" p="xl" mt="xl" bg="gray.0">
+      {/* Stats du mois */}
+      <Paper withBorder radius="lg" p="xl" mt="xl" bg="white">
         <Title order={3} mb="lg">
           Activité du mois – Novembre 2025
         </Title>
-        <Grid>
+
+        <Grid align="center">
+          {/* 1 */}
           <Grid.Col span={{ base: 6, md: 3 }}>
-            <Stack align="center">
+            <Stack align="center" gap={4}>
               <RingProgress
                 size={100}
                 thickness={8}
@@ -134,23 +136,27 @@ const Home = () => {
               <Text size="sm" c="dimmed">Évaluations complétées</Text>
             </Stack>
           </Grid.Col>
+
+          {/* 2 */}
           <Grid.Col span={{ base: 6, md: 3 }}>
-            <Stack align="center">
+            <Stack align="center" gap={4}>
               <Text size="3xl" fw={800} c="blue">24</Text>
               <Text size="sm" c="dimmed">Évaluations créées</Text>
             </Stack>
           </Grid.Col>
+
+          {/* 3 */}
           <Grid.Col span={{ base: 6, md: 3 }}>
-            <Stack align="center">
+            <Stack align="center" gap={4}>
               <Text size="3xl" fw={800} c="orange">7.8 / 10</Text>
               <Text size="sm" c="dimmed">Note moyenne</Text>
             </Stack>
           </Grid.Col>
+
+          {/* 4 */}
           <Grid.Col span={{ base: 6, md: 3 }}>
-            <Stack align="center">
-              <Text size="3xl" fw={800} c="green">
-                <IconTrendingUp size={40} />
-              </Text>
+            <Stack align="center" gap={4}>
+              <IconTrendingUp size={45} color="green" />
               <Text size="sm" c="dimmed">En progression</Text>
             </Stack>
           </Grid.Col>

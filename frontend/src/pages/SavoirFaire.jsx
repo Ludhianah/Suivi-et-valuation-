@@ -9,7 +9,6 @@ import {
   ActionIcon,
   Modal,
   rem,
-  Paper,
   LoadingOverlay,
 } from "@mantine/core";
 import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
@@ -20,11 +19,12 @@ import {
   deleteSavoirFaire,
 } from "../services/savoirFaireService";
 import { getDepartements } from "../services/departementService";
+import { getIndicateurSF } from "../services/indicateurSFService";
 
 const SavoirFaire = () => {
   const [savoirFaires, setSavoirFaires] = useState([]);
   const [departements, setDepartements] = useState([]);
-  const [indicateurs, setIndicateurs] = useState([]); // Si tu as une API pour les indicateurs
+  const [indicateurs, setIndicateurs] = useState([]);
   const [nomIndicateur, setNomIndicateur] = useState("");
   const [departementId, setDepartementId] = useState("");
   const [poids, setPoids] = useState("");
@@ -36,18 +36,19 @@ const SavoirFaire = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [sfData, deptData] = await Promise.all([
+      const [sfData, deptData, indicateurData] = await Promise.all([
         getSavoirFaires(),
         getDepartements(),
+        getIndicateurSF(),
       ]);
       setSavoirFaires(Array.isArray(sfData) ? sfData : sfData.results || []);
       setDepartements(Array.isArray(deptData) ? deptData : deptData.results || []);
-      // Si tu récupères les indicateurs depuis l’API
-      // setIndicateurs(indicateurData);
+      setIndicateurs(Array.isArray(indicateurData) ? indicateurData : indicateurData.results || []);
     } catch (error) {
       console.error("Erreur chargement :", error);
       setSavoirFaires([]);
       setDepartements([]);
+      setIndicateurs([]);
     } finally {
       setLoading(false);
     }
@@ -114,10 +115,12 @@ const SavoirFaire = () => {
   };
 
   return (
-    <Paper withBorder shadow="sm" p="md" className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-white p-6">
       <LoadingOverlay visible={loading} overlayBlur={2} />
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <Title order={2} className="text-gray-800">
+
+      {/* En-tête */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+        <Title order={2} className="text-gray-800 font-medium">
           Savoir-Faire
         </Title>
         <Button
@@ -126,47 +129,51 @@ const SavoirFaire = () => {
             setOpened(true);
           }}
           leftSection={<IconPlus size={16} />}
-          className="bg-blue-600 hover:bg-blue-700 transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 transition-colors text-white"
+          radius="md"
         >
           Ajouter
         </Button>
       </div>
 
       {/* Tableau */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
-        <Table striped highlightOnHover withTableBorder>
+      <div className="overflow-x-auto bg-white rounded-lg shadow-sm">
+        <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th className="font-semibold text-gray-700">Département</Table.Th>
-              <Table.Th className="font-semibold text-gray-700">Indicateur</Table.Th>
-              <Table.Th className="font-semibold text-gray-700">Objectif</Table.Th>
-              <Table.Th className="font-semibold text-gray-700">Poids (%)</Table.Th>
-              <Table.Th className="font-semibold text-gray-700">Actions</Table.Th>
+              <Table.Th className="font-medium text-gray-600">Département</Table.Th>
+              <Table.Th className="font-medium text-gray-600">Indicateur</Table.Th>
+              <Table.Th className="font-medium text-gray-600">Objectif</Table.Th>
+              <Table.Th className="font-medium text-gray-600">Poids (%)</Table.Th>
+              <Table.Th className="font-medium text-gray-600 text-center">Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {savoirFaires.length > 0 ? (
               savoirFaires.map((sf) => (
-                <Table.Tr key={sf.id} className="hover:bg-gray-50 transition-colors">
-                  <Table.Td>{sf.nom_departement}</Table.Td>
-                  <Table.Td>{sf.nom_indicateur}</Table.Td>
-                  <Table.Td>{sf.objectif}</Table.Td>
-                  <Table.Td>{sf.poids_pourcentage}</Table.Td>
-                  <Table.Td>
-                    <Group gap="xs" justify="center">
+                <Table.Tr
+                  key={sf.id}
+                  className="hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <Table.Td className="text-gray-700">{sf.nom_departement}</Table.Td>
+                  <Table.Td className="text-gray-700">{sf.nom_indicateur}</Table.Td>
+                  <Table.Td className="text-gray-700">{sf.objectif}</Table.Td>
+                  <Table.Td className="text-gray-700">{sf.poids_pourcentage}</Table.Td>
+                  <Table.Td className="text-center">
+                    <Group spacing={0} position="center">
                       <ActionIcon
-                        variant="filled"
-                        color="yellow"
+                        variant="subtle"
+                        color="blue"
                         onClick={() => handleEdit(sf)}
-                        className="hover:scale-105 transition-transform"
+                        className="p-0"
                       >
                         <IconEdit style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
                       <ActionIcon
-                        variant="filled"
+                        variant="subtle"
                         color="red"
                         onClick={() => handleDeleteClick(sf.id)}
-                        className="hover:scale-105 transition-transform"
+                        className="p-0"
                       >
                         <IconTrash style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
@@ -176,7 +183,7 @@ const SavoirFaire = () => {
               ))
             ) : (
               <Table.Tr>
-                <Table.Td colSpan={5} align="center" className="py-4 text-gray-500">
+                <Table.Td colSpan={5} align="center" className="py-6 text-gray-400">
                   Aucun Savoir-Faire trouvé
                 </Table.Td>
               </Table.Tr>
@@ -185,18 +192,21 @@ const SavoirFaire = () => {
         </Table>
       </div>
 
+
       {/* Modal */}
       <Modal
         opened={opened}
         onClose={resetForm}
         title={
-          <Title order={4} className="text-gray-800">
+          <Title order={4} className="text-gray-800 font-medium">
             {editId ? "Modifier le Savoir-Faire" : "Ajouter un Savoir-Faire"}
           </Title>
         }
         centered
+        radius="md"
+        shadow="lg"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <Select
             label="Département"
             placeholder="Choisir un département"
@@ -209,6 +219,7 @@ const SavoirFaire = () => {
             required
             className="w-full"
             searchable
+            radius="md"
           />
           <Select
             label="Indicateur"
@@ -222,6 +233,7 @@ const SavoirFaire = () => {
             required
             className="w-full"
             searchable
+            radius="md"
           />
           <TextInput
             label="Objectif"
@@ -230,6 +242,7 @@ const SavoirFaire = () => {
             onChange={(e) => setObjectif(e.target.value)}
             required
             className="w-full"
+            radius="md"
           />
           <TextInput
             label="Poids (%)"
@@ -241,26 +254,29 @@ const SavoirFaire = () => {
             type="number"
             min="0"
             max="100"
+            radius="md"
           />
           <Group justify="flex-end" mt="md">
             <Button
               type="button"
               variant="outline"
               onClick={resetForm}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              radius="md"
             >
               Annuler
             </Button>
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 hover:bg-blue-700 transition-colors text-white"
+              radius="md"
             >
               {editId ? "Modifier" : "Ajouter"}
             </Button>
           </Group>
         </form>
       </Modal>
-    </Paper>
+    </div>
   );
 };
 
