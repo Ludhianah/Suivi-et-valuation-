@@ -59,25 +59,17 @@ def indicateur_sf_api(request, pk=None):
 # =============================================================================
 # SAVOIR-FAIRE (SavoirFaire)
 # =============================================================================
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def savoir_faire_api(request, pk=None):
-    """
-    API pour gérer les SavoirFaire :
-    - Inclut les relations avec département et indicateur SF via select_related
-    """
     if request.method == 'GET':
         if pk:
             try:
-                # Optimisation : évite les requêtes SQL supplémentaires
                 obj = SavoirFaire.objects.select_related('id_departement', 'id_indicateur_sf').get(pk=pk)
                 serializer = SavoirFaireSerializer(obj)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except SavoirFaire.DoesNotExist:
-                return Response(
-                    {"detail": "SavoirFaire non trouvé."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
         else:
             qs = SavoirFaire.objects.select_related('id_departement', 'id_indicateur_sf').all()
             serializer = SavoirFaireSerializer(qs, many=True)
@@ -90,6 +82,24 @@ def savoir_faire_api(request, pk=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    elif request.method in ['PUT', 'PATCH']:
+        try:
+            obj = SavoirFaire.objects.get(pk=pk)
+        except SavoirFaire.DoesNotExist:
+            return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = SavoirFaireSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        try:
+            obj = SavoirFaire.objects.get(pk=pk)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except SavoirFaire.DoesNotExist:
+            return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
 # =============================================================================
 # INDICATEUR SAVOIR-ÊTRE (IndicateurSE)
@@ -128,12 +138,9 @@ def indicateur_se_api(request, pk=None):
 # =============================================================================
 # SAVOIR-ÊTRE (SavoirEtre)
 # =============================================================================
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def savoir_etre_api(request, pk=None):
-    """
-    API pour les SavoirEtre avec relation vers IndicateurSE.
-    """
     if request.method == 'GET':
         if pk:
             try:
@@ -141,10 +148,7 @@ def savoir_etre_api(request, pk=None):
                 serializer = SavoirEtreSerializer(obj)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except SavoirEtre.DoesNotExist:
-                return Response(
-                    {"detail": "SavoirEtre non trouvé."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                return Response({"detail": "SavoirEtre non trouvé."}, status=status.HTTP_404_NOT_FOUND)
         else:
             qs = SavoirEtre.objects.select_related('id_indicateur_se').all()
             serializer = SavoirEtreSerializer(qs, many=True)
@@ -156,6 +160,25 @@ def savoir_etre_api(request, pk=None):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method in ['PUT', 'PATCH']:
+        try:
+            obj = SavoirEtre.objects.get(pk=pk)
+        except SavoirEtre.DoesNotExist:
+            return Response({"detail": "SavoirEtre non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = SavoirEtreSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        try:
+            obj = SavoirEtre.objects.get(pk=pk)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except SavoirEtre.DoesNotExist:
+            return Response({"detail": "SavoirEtre non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
 
 # =============================================================================
