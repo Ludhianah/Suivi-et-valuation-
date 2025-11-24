@@ -23,3 +23,14 @@ export const getIndicateurSF = async () => {
     throw error;
   }
 };
+
+// 🔹 Ajouter un Indicateur SF
+export const addIndicateurSF = async (data) => {
+  try {
+    const response = await axios.post(API_URL, data, getConfig());
+    return response.data;
+  } catch (error) {
+    console.error("Erreur addIndicateurSF :", error.response?.data || error.message);
+    throw error;
+  }
+};
