@@ -8,30 +8,42 @@ import {
   Title,
   Modal,
   LoadingOverlay,
-  Paper,
+  rem,
+  ActionIcon,
 } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react";
 
-import { getIndicateurSF, addIndicateurSF} from "../services/indicateurSFService";
-import { getIndicateursSE, addIndicateurSE } from "../services/indicateurSEService";
+import {
+  getIndicateurSF,
+  addIndicateurSF,
+  updateIndicateurSF,
+  deleteIndicateurSF,
+} from "../services/indicateurSFService";
+
+import {
+  getIndicateursSE,
+  addIndicateurSE,
+  updateIndicateurSE,
+  deleteIndicateurSE,
+} from "../services/indicateurSEService";
 
 const Indicateurs = () => {
   // --------------------- STATES SF ----------------------
   const [sf, setSf] = useState([]);
   const [loadingSF, setLoadingSF] = useState(false);
   const [openModalSF, setOpenModalSF] = useState(false);
-
   const [sfNom, setSfNom] = useState("");
   const [sfDescription, setSfDescription] = useState("");
   const [sfUnite, setSfUnite] = useState("");
+  const [editingSF, setEditingSF] = useState(null);
 
   // --------------------- STATES SE ----------------------
   const [se, setSe] = useState([]);
   const [loadingSE, setLoadingSE] = useState(false);
   const [openModalSE, setOpenModalSE] = useState(false);
-
   const [seNom, setSeNom] = useState("");
   const [seDescription, setSeDescription] = useState("");
+  const [editingSE, setEditingSE] = useState(null);
 
   // ---------------------- LOAD DATA ---------------------
   useEffect(() => {
@@ -63,49 +75,118 @@ const Indicateurs = () => {
     }
   };
 
-  // ---------------------- ADD SF -----------------------
+  // ---------------------- SF HANDLERS ----------------------
   const handleAddSF = async () => {
     if (!sfNom.trim()) return;
-
     try {
       await addIndicateurSF({
         nom_indicateur: sfNom,
         description: sfDescription,
         unite_mesure: sfUnite,
       });
-
-      setOpenModalSF(false);
-      setSfNom("");
-      setSfDescription("");
-      setSfUnite("");
+      resetSFModal();
       loadSF();
     } catch (error) {
       console.error("Erreur ajout indicateur SF :", error);
     }
   };
 
-  // ---------------------- ADD SE -----------------------
+  const handleEditSF = (item) => {
+    setEditingSF(item);
+    setSfNom(item.nom_indicateur);
+    setSfDescription(item.description);
+    setSfUnite(item.unite_mesure || "");
+    setOpenModalSF(true);
+  };
+
+  const handleUpdateSF = async () => {
+    if (!sfNom.trim() || !editingSF) return;
+    try {
+      await updateIndicateurSF(editingSF.id, {
+        nom_indicateur: sfNom,
+        description: sfDescription,
+        unite_mesure: sfUnite,
+      });
+      resetSFModal();
+      loadSF();
+    } catch (error) {
+      console.error("Erreur mise à jour indicateur SF :", error);
+    }
+  };
+
+  const handleDeleteSF = async (id) => {
+    if (!confirm("Voulez-vous vraiment supprimer cet indicateur SF ?")) return;
+    try {
+      await deleteIndicateurSF(id);
+      loadSF();
+    } catch (error) {
+      console.error("Erreur suppression indicateur SF :", error);
+    }
+  };
+
+  const resetSFModal = () => {
+    setOpenModalSF(false);
+    setEditingSF(null);
+    setSfNom("");
+    setSfDescription("");
+    setSfUnite("");
+  };
+
+  // ---------------------- SE HANDLERS ----------------------
   const handleAddSE = async () => {
     if (!seNom.trim()) return;
-
     try {
       await addIndicateurSE({
         nom_indicateur: seNom,
         description: seDescription,
       });
-
-      setOpenModalSE(false);
-      setSeNom("");
-      setSeDescription("");
+      resetSEModal();
       loadSE();
     } catch (error) {
       console.error("Erreur ajout indicateur SE :", error);
     }
   };
 
+  const handleEditSE = (item) => {
+    setEditingSE(item);
+    setSeNom(item.nom_indicateur);
+    setSeDescription(item.description);
+    setOpenModalSE(true);
+  };
+
+  const handleUpdateSE = async () => {
+    if (!seNom.trim() || !editingSE) return;
+    try {
+      await updateIndicateurSE(editingSE.id, {
+        nom_indicateur: seNom,
+        description: seDescription,
+      });
+      resetSEModal();
+      loadSE();
+    } catch (error) {
+      console.error("Erreur mise à jour indicateur SE :", error);
+    }
+  };
+
+  const handleDeleteSE = async (id) => {
+    if (!confirm("Voulez-vous vraiment supprimer cet indicateur SE ?")) return;
+    try {
+      await deleteIndicateurSE(id);
+      loadSE();
+    } catch (error) {
+      console.error("Erreur suppression indicateur SE :", error);
+    }
+  };
+
+  const resetSEModal = () => {
+    setOpenModalSE(false);
+    setEditingSE(null);
+    setSeNom("");
+    setSeDescription("");
+  };
+
   return (
     <div className="min-h-screen bg-white p-6 space-y-14">
-
       <Title order={2} className="text-gray-800 font-medium mb-4">
         Gestion des Indicateurs
       </Title>
@@ -116,7 +197,6 @@ const Indicateurs = () => {
           <Title order={3} className="text-gray-800 font-medium">
             Indicateurs de Savoir-Faire
           </Title>
-
           <Button
             onClick={() => setOpenModalSF(true)}
             leftSection={<IconPlus size={16} />}
@@ -135,6 +215,7 @@ const Indicateurs = () => {
               <Table.Th>Nom</Table.Th>
               <Table.Th>Description</Table.Th>
               <Table.Th>Unité</Table.Th>
+              <Table.Th>Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
 
@@ -145,11 +226,30 @@ const Indicateurs = () => {
                   <Table.Td>{item.nom_indicateur}</Table.Td>
                   <Table.Td>{item.description}</Table.Td>
                   <Table.Td>{item.unite_mesure || "-"}</Table.Td>
+                  <Table.Td>
+                    <Group spacing="xs">
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleEditSF(item)}
+                      >
+                        <IconEdit style={{ width: rem(16), height: rem(16) }} />
+                      </ActionIcon>
+
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => handleDeleteSF(item.id)}
+                      >
+                        <IconTrash style={{ width: rem(16), height: rem(16) }} />
+                      </ActionIcon>
+                    </Group>
+                  </Table.Td>
                 </Table.Tr>
               ))
             ) : (
               <Table.Tr>
-                <Table.Td colSpan={3} align="center">
+                <Table.Td colSpan={4} align="center">
                   Aucun indicateur SF trouvé
                 </Table.Td>
               </Table.Tr>
@@ -164,7 +264,6 @@ const Indicateurs = () => {
           <Title order={3} className="text-gray-800 font-medium">
             Indicateurs de Savoir-Être
           </Title>
-
           <Button
             onClick={() => setOpenModalSE(true)}
             leftSection={<IconPlus size={16} />}
@@ -182,6 +281,7 @@ const Indicateurs = () => {
             <Table.Tr>
               <Table.Th>Nom</Table.Th>
               <Table.Th>Description</Table.Th>
+              <Table.Th>Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
 
@@ -191,11 +291,30 @@ const Indicateurs = () => {
                 <Table.Tr key={item.id}>
                   <Table.Td>{item.nom_indicateur}</Table.Td>
                   <Table.Td>{item.description}</Table.Td>
+                  <Table.Td>
+                    <Group spacing="xs">
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => handleEditSE(item)}
+                      >
+                        <IconEdit style={{ width: rem(16), height: rem(16) }} />
+                      </ActionIcon>
+
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => handleDeleteSE(item.id)}
+                      >
+                        <IconTrash style={{ width: rem(16), height: rem(16) }} />
+                      </ActionIcon>
+                    </Group>
+                  </Table.Td>
                 </Table.Tr>
               ))
             ) : (
               <Table.Tr>
-                <Table.Td colSpan={2} align="center">
+                <Table.Td colSpan={3} align="center">
                   Aucun indicateur SE trouvé
                 </Table.Td>
               </Table.Tr>
@@ -207,8 +326,12 @@ const Indicateurs = () => {
       {/* -------------------- MODAL SF --------------------- */}
       <Modal
         opened={openModalSF}
-        onClose={() => setOpenModalSF(false)}
-        title={<Title order={4}>Ajouter un indicateur SF</Title>}
+        onClose={resetSFModal}
+        title={
+          <Title order={4}>
+            {editingSF ? "Modifier un indicateur SF" : "Ajouter un indicateur SF"}
+          </Title>
+        }
         centered
       >
         <div className="space-y-4">
@@ -234,10 +357,10 @@ const Indicateurs = () => {
 
           <Group justify="flex-end">
             <Button
-              onClick={handleAddSF}
+              onClick={editingSF ? handleUpdateSF : handleAddSF}
               className="bg-blue-600 text-white"
             >
-              Enregistrer
+              {editingSF ? "Mettre à jour" : "Enregistrer"}
             </Button>
           </Group>
         </div>
@@ -246,8 +369,12 @@ const Indicateurs = () => {
       {/* -------------------- MODAL SE --------------------- */}
       <Modal
         opened={openModalSE}
-        onClose={() => setOpenModalSE(false)}
-        title={<Title order={4}>Ajouter un indicateur SE</Title>}
+        onClose={resetSEModal}
+        title={
+          <Title order={4}>
+            {editingSE ? "Modifier un indicateur SE" : "Ajouter un indicateur SE"}
+          </Title>
+        }
         centered
       >
         <div className="space-y-4">
@@ -267,10 +394,10 @@ const Indicateurs = () => {
 
           <Group justify="flex-end">
             <Button
-              onClick={handleAddSE}
+              onClick={editingSE ? handleUpdateSE : handleAddSE}
               className="bg-blue-600 text-white"
             >
-              Enregistrer
+              {editingSE ? "Mettre à jour" : "Enregistrer"}
             </Button>
           </Group>
         </div>
