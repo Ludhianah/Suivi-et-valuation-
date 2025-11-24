@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextInput, PasswordInput, Button } from "@mantine/core";
-import { registerUser } from "../services/authService"; // ✅ Import du service
+import { registerUser } from "../services/authService";
+import toast, { Toaster } from "react-hot-toast";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -9,40 +10,31 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
-  // 🔹 Fonction d'inscription
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess(false);
 
     if (!username || !email || !password) {
-      setError("Tous les champs sont obligatoires.");
+      toast.error("Tous les champs sont obligatoires.");
       return;
     }
 
     try {
-      // ⬅️ On utilise maintenant le service authService
-      await registerUser({
-        username,
-        email,
-        password,
-      });
-
-      setSuccess(true);
-
-      // 🔁 Redirection après 2 secondes
+      await registerUser({ username, email, password });
+      toast.success("Inscription réussie ! Redirection en cours...");
+      
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       console.error(err);
-      setError("Erreur lors de l'inscription. Vérifie les informations.");
+      toast.error("Erreur lors de l'inscription. Vérifie les informations.");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-indigo-50">
+      {/* Toaster */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       <div className="w-full max-w-sm p-8 bg-white rounded-2xl shadow-xl transform transition-all hover:scale-[1.01] hover:shadow-2xl">
         <h2 className="text-2xl font-bold text-gray-800 mb-7 text-center tracking-tight">
           Crée ton compte <span className="text-blue-600">✨</span>
@@ -104,16 +96,6 @@ const Register = () => {
             S'inscrire
           </Button>
         </form>
-
-        {error && (
-          <p className="text-red-600 text-center mt-3 font-medium">{error}</p>
-        )}
-
-        {success && (
-          <p className="text-green-600 text-center mt-3 font-medium">
-            Inscription réussie ! Redirection en cours...
-          </p>
-        )}
 
         <div className="mt-5 text-center">
           <span

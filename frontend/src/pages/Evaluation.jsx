@@ -24,6 +24,7 @@ import {
 import { getEmployes } from "../services/employeService";
 import { getIndicateurSF } from "../services/indicateurSFService";
 import { getIndicateursSE } from "../services/indicateurSEService";
+import toast from "react-hot-toast";
 
 const Evaluation = () => {
   const [evaluations, setEvaluations] = useState([]);
@@ -67,6 +68,7 @@ const Evaluation = () => {
     fetchFormData();
   }, []);
 
+
   const handleSubmit = async () => {
     const payload = {
       annee: Number(annee),
@@ -88,10 +90,17 @@ const Evaluation = () => {
 
     try {
       await createEvaluation(payload);
+
+      // Notification succès
+      toast.success("Évaluation créée avec succès !");
+
       setOpened(false);
       fetchData();
     } catch (err) {
-      console.log("Erreur création :", err);
+      console.error("Erreur création :", err);
+
+      // Notification erreur
+      toast.error("Erreur lors de la création de l’évaluation");
     }
   };
 

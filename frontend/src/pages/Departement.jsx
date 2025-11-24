@@ -19,6 +19,9 @@ import {
   deleteDepartement,
 } from "../services/departementService";
 
+// --- Import toast ---
+import toast, { Toaster } from "react-hot-toast";
+
 const Departement = () => {
   const [departements, setDepartements] = useState([]);
   const [nom, setNom] = useState("");
@@ -31,6 +34,7 @@ const Departement = () => {
       setDepartements(data);
     } catch (error) {
       console.error("Erreur chargement départements :", error);
+      toast.error("Erreur lors du chargement des départements");
     }
   };
 
@@ -44,8 +48,10 @@ const Departement = () => {
     try {
       if (editId) {
         await updateDepartement(editId, { nom_departement: nom });
+        toast.success("Département modifié avec succès !");
       } else {
         await createDepartement({ nom_departement: nom });
+        toast.success("Département ajouté avec succès !");
       }
       setNom("");
       setEditId(null);
@@ -53,6 +59,7 @@ const Departement = () => {
       setOpened(false);
     } catch (error) {
       console.error("Erreur lors de la sauvegarde :", error);
+      toast.error("Erreur lors de la sauvegarde du département");
     }
   };
 
@@ -67,13 +74,18 @@ const Departement = () => {
     try {
       await deleteDepartement(id);
       fetchData();
+      toast.success("Département supprimé !");
     } catch (error) {
       console.error("Erreur suppression :", error);
+      toast.error("Erreur lors de la suppression du département");
     }
   };
 
   return (
     <Box className="p-6 bg-white min-h-screen">
+      {/* Toaster */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       {/* En-tête avec titre et bouton "Ajouter" */}
       <Flex justify="space-between" align="center" mb="lg">
         <Title order={2} className="text-gray-800">
@@ -114,14 +126,14 @@ const Departement = () => {
                 <Table.Td>{new Date(d.date_creation).toLocaleDateString()}</Table.Td>
                 <Table.Td style={{ textAlign: 'center', width: '120px' }}>
                   <Group gap="xs" justify="center">
-                   <ActionIcon
-                        variant="subtle"
-                        color="blue"
-                        onClick={() => handleEdit(d)}
-                        className="p-0 hover:bg-blue-50 transition-colors"
-                      >
-                        <IconEdit style={{ width: rem(16), height: rem(16) }} />
-                      </ActionIcon>
+                    <ActionIcon
+                      variant="subtle"
+                      color="blue"
+                      onClick={() => handleEdit(d)}
+                      className="p-0 hover:bg-blue-50 transition-colors"
+                    >
+                      <IconEdit style={{ width: rem(16), height: rem(16) }} />
+                    </ActionIcon>
                     <ActionIcon
                       variant="subtle"
                       color="red"

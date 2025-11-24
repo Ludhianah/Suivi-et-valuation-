@@ -13,6 +13,9 @@ import {
 } from "@mantine/core";
 import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react";
 
+// --- Import toast ---
+import toast, { Toaster } from "react-hot-toast";
+
 import {
   getIndicateurSF,
   addIndicateurSF,
@@ -58,6 +61,7 @@ const Indicateurs = () => {
       setSf(data);
     } catch (error) {
       console.error("Erreur récupération indicateurs SF :", error);
+      toast.error("Erreur récupération indicateurs SF");
     } finally {
       setLoadingSF(false);
     }
@@ -70,6 +74,7 @@ const Indicateurs = () => {
       setSe(data);
     } catch (error) {
       console.error("Erreur récupération indicateurs SE :", error);
+      toast.error("Erreur récupération indicateurs SE");
     } finally {
       setLoadingSE(false);
     }
@@ -86,8 +91,10 @@ const Indicateurs = () => {
       });
       resetSFModal();
       loadSF();
+      toast.success("Indicateur SF ajouté avec succès !");
     } catch (error) {
       console.error("Erreur ajout indicateur SF :", error);
+      toast.error("Erreur lors de l'ajout de l'indicateur SF");
     }
   };
 
@@ -109,8 +116,10 @@ const Indicateurs = () => {
       });
       resetSFModal();
       loadSF();
+      toast.success("Indicateur SF mis à jour avec succès !");
     } catch (error) {
       console.error("Erreur mise à jour indicateur SF :", error);
+      toast.error("Erreur lors de la mise à jour de l'indicateur SF");
     }
   };
 
@@ -119,8 +128,10 @@ const Indicateurs = () => {
     try {
       await deleteIndicateurSF(id);
       loadSF();
+      toast.success("Indicateur SF supprimé avec succès !");
     } catch (error) {
       console.error("Erreur suppression indicateur SF :", error);
+      toast.error("Erreur lors de la suppression de l'indicateur SF");
     }
   };
 
@@ -142,8 +153,10 @@ const Indicateurs = () => {
       });
       resetSEModal();
       loadSE();
+      toast.success("Indicateur SE ajouté avec succès !");
     } catch (error) {
       console.error("Erreur ajout indicateur SE :", error);
+      toast.error("Erreur lors de l'ajout de l'indicateur SE");
     }
   };
 
@@ -163,8 +176,10 @@ const Indicateurs = () => {
       });
       resetSEModal();
       loadSE();
+      toast.success("Indicateur SE mis à jour avec succès !");
     } catch (error) {
       console.error("Erreur mise à jour indicateur SE :", error);
+      toast.error("Erreur lors de la mise à jour de l'indicateur SE");
     }
   };
 
@@ -173,8 +188,10 @@ const Indicateurs = () => {
     try {
       await deleteIndicateurSE(id);
       loadSE();
+      toast.success("Indicateur SE supprimé avec succès !");
     } catch (error) {
       console.error("Erreur suppression indicateur SE :", error);
+      toast.error("Erreur lors de la suppression de l'indicateur SE");
     }
   };
 
@@ -187,6 +204,9 @@ const Indicateurs = () => {
 
   return (
     <div className="min-h-screen bg-white p-6 space-y-14">
+      {/* Toaster pour les notifications */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       <Title order={2} className="text-gray-800 font-medium mb-4">
         Gestion des Indicateurs
       </Title>

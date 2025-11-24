@@ -23,6 +23,9 @@ import {
 // ⚠️ Correction ici : getIndicateursSE
 import { getIndicateursSE } from "../services/indicateurSEService";
 
+// Import toast
+import toast, { Toaster } from "react-hot-toast";
+
 const SavoirEtre = () => {
   const [savoirEtres, setSavoirEtres] = useState([]);
   const [indicateurs, setIndicateurs] = useState([]);
@@ -42,6 +45,7 @@ const SavoirEtre = () => {
     } catch (error) {
       console.error("Erreur chargement :", error);
       setSavoirEtres([]);
+      toast.error("Erreur lors du chargement des savoir-être");
     } finally {
       setLoading(false);
     }
@@ -55,6 +59,7 @@ const SavoirEtre = () => {
     } catch (error) {
       console.error("Erreur chargement indicateurs :", error);
       setIndicateurs([]);
+      toast.error("Erreur lors du chargement des indicateurs");
     }
   };
 
@@ -65,7 +70,10 @@ const SavoirEtre = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nomIndicateur || !poids) return;
+    if (!nomIndicateur || !poids) {
+      toast.error("Veuillez remplir tous les champs !");
+      return;
+    }
 
     setLoading(true);
 
@@ -77,13 +85,16 @@ const SavoirEtre = () => {
     try {
       if (editId) {
         await updateSavoirEtre(editId, payload);
+        toast.success("Savoir-Être modifié avec succès !");
       } else {
         await createSavoirEtre(payload);
+        toast.success("Savoir-Être ajouté avec succès !");
       }
       resetForm();
       fetchSavoirEtre();
     } catch (error) {
       console.error("Erreur sauvegarde :", error);
+      toast.error("Erreur lors de la sauvegarde !");
     } finally {
       setLoading(false);
     }
@@ -109,9 +120,11 @@ const SavoirEtre = () => {
     setLoading(true);
     try {
       await deleteSavoirEtre(id);
+      toast.success("Savoir-Être supprimé !");
       fetchSavoirEtre();
     } catch (error) {
       console.error("Erreur suppression :", error);
+      toast.error("Erreur lors de la suppression !");
     } finally {
       setLoading(false);
     }
@@ -119,6 +132,9 @@ const SavoirEtre = () => {
 
   return (
     <div className="min-h-screen bg-white p-6">
+      {/* Toaster */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       <LoadingOverlay visible={loading} overlayBlur={2} />
 
       {/* Header */}

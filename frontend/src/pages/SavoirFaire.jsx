@@ -21,6 +21,9 @@ import {
 import { getDepartements } from "../services/departementService";
 import { getIndicateurSF } from "../services/indicateurSFService";
 
+// Import toast
+import toast, { Toaster } from "react-hot-toast";
+
 const SavoirFaire = () => {
   const [savoirFaires, setSavoirFaires] = useState([]);
   const [departements, setDepartements] = useState([]);
@@ -49,6 +52,7 @@ const SavoirFaire = () => {
       setSavoirFaires([]);
       setDepartements([]);
       setIndicateurs([]);
+      toast.error("Erreur lors du chargement des données !");
     } finally {
       setLoading(false);
     }
@@ -60,7 +64,10 @@ const SavoirFaire = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nomIndicateur || !departementId || !poids || !objectif) return;
+    if (!nomIndicateur || !departementId || !poids || !objectif) {
+      toast.error("Veuillez remplir tous les champs !");
+      return;
+    }
     setLoading(true);
     try {
       const payload = {
@@ -71,13 +78,16 @@ const SavoirFaire = () => {
       };
       if (editId) {
         await updateSavoirFaire(editId, payload);
+        toast.success("Savoir-Faire modifié avec succès !");
       } else {
         await createSavoirFaire(payload);
+        toast.success("Savoir-Faire ajouté avec succès !");
       }
       resetForm();
       fetchData();
     } catch (error) {
       console.error("Erreur sauvegarde :", error);
+      toast.error("Erreur lors de la sauvegarde !");
     } finally {
       setLoading(false);
     }
@@ -106,9 +116,11 @@ const SavoirFaire = () => {
     setLoading(true);
     try {
       await deleteSavoirFaire(id);
+      toast.success("Savoir-Faire supprimé !");
       fetchData();
     } catch (error) {
       console.error("Erreur suppression :", error);
+      toast.error("Erreur lors de la suppression !");
     } finally {
       setLoading(false);
     }
@@ -116,6 +128,9 @@ const SavoirFaire = () => {
 
   return (
     <div className="min-h-screen bg-white p-6">
+      {/* Toaster */}
+      <Toaster position="top-right" reverseOrder={false} />
+
       <LoadingOverlay visible={loading} overlayBlur={2} />
 
       {/* En-tête */}
@@ -151,30 +166,17 @@ const SavoirFaire = () => {
           <Table.Tbody>
             {savoirFaires.length > 0 ? (
               savoirFaires.map((sf) => (
-                <Table.Tr
-                  key={sf.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
+                <Table.Tr key={sf.id} className="hover:bg-gray-50 transition-colors duration-150">
                   <Table.Td className="text-gray-700">{sf.nom_departement}</Table.Td>
                   <Table.Td className="text-gray-700">{sf.nom_indicateur}</Table.Td>
                   <Table.Td className="text-gray-700">{sf.objectif}</Table.Td>
                   <Table.Td className="text-gray-700">{sf.poids_pourcentage}</Table.Td>
                   <Table.Td className="text-center">
                     <Group spacing={0} position="center">
-                      <ActionIcon
-                        variant="subtle"
-                        color="blue"
-                        onClick={() => handleEdit(sf)}
-                        className="p-0"
-                      >
+                      <ActionIcon variant="subtle" color="blue" onClick={() => handleEdit(sf)} className="p-0">
                         <IconEdit style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        onClick={() => handleDeleteClick(sf.id)}
-                        className="p-0"
-                      >
+                      <ActionIcon variant="subtle" color="red" onClick={() => handleDeleteClick(sf.id)} className="p-0">
                         <IconTrash style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
                     </Group>
@@ -191,7 +193,6 @@ const SavoirFaire = () => {
           </Table.Tbody>
         </Table>
       </div>
-
 
       {/* Modal */}
       <Modal
@@ -257,20 +258,10 @@ const SavoirFaire = () => {
             radius="md"
           />
           <Group justify="flex-end" mt="md">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={resetForm}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-              radius="md"
-            >
+            <Button type="button" variant="outline" onClick={resetForm} className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors" radius="md">
               Annuler
             </Button>
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 transition-colors text-white"
-              radius="md"
-            >
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 transition-colors text-white" radius="md">
               {editId ? "Modifier" : "Ajouter"}
             </Button>
           </Group>

@@ -13,6 +13,7 @@ import {
     IconGauge,
 } from "@tabler/icons-react";
 import { Button, Tooltip } from "@mantine/core";
+import toast from "react-hot-toast"; // ✅ AJOUT
 
 const Sidebar = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -35,6 +36,9 @@ const Sidebar = () => {
     const handleLogout = () => {
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
+
+        toast.success("Déconnexion réussie !"); // ✅ AJOUT DU TOAST
+
         navigate("/login");
     };
 

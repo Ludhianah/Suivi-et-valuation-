@@ -1,36 +1,38 @@
 import { useState } from 'react';
 import { TextInput, PasswordInput, Button } from '@mantine/core';
 import { useNavigate } from "react-router-dom";
-
-// 👉 On importe la fonction loginUser depuis services/
 import { loginUser } from "../services/authService";
+import toast from "react-hot-toast"; // ✅ Import toast
 
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // ============================
-  // 🔹 Fonction de soumission du formulaire
-  // ============================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!username || !password) {
+      toast.error("Tous les champs sont obligatoires !");
+      return;
+    }
+
     try {
-      // 👉 Appel du service authService
       const response = await loginUser(username, password);
 
-      // ✅ On stocke les tokens reçus
+      // Stockage des tokens
       localStorage.setItem("access", response.data.access);
       localStorage.setItem("refresh", response.data.refresh);
 
-      // 👉 Redirection vers /home
+      // Notification de succès
+      toast.success("Connexion réussie !");
+
+      // Redirection vers /home
       navigate("/home");
 
     } catch (err) {
       console.error("Erreur de connexion :", err);
-      setError("Nom d'utilisateur ou mot de passe incorrect");
+      toast.error("Nom d'utilisateur ou mot de passe incorrect");
     }
   };
 
@@ -39,14 +41,10 @@ function LoginForm() {
       <div className="w-full max-w-sm p-8 bg-white rounded-2xl shadow-xl">
 
         <h2 className="text-2xl font-bold text-gray-800 mb-7 text-center">
-          connexion <span className="text-blue-600">👋</span>
+          Connexion <span className="text-blue-600">👋</span>
         </h2>
 
-        {/* =======================
-            🔹 Formulaire de login
-        ======================== */}
         <form onSubmit={handleSubmit} className="space-y-6">
-
           <TextInput
             label="Nom d'utilisateur"
             placeholder="ex: dan_nah"
@@ -75,11 +73,6 @@ function LoginForm() {
           </Button>
         </form>
 
-        {error && <p className="text-red-600 text-center mt-3">{error}</p>}
-
-        {/* =======================
-            🔹 Liens sous formulaire
-        ======================== */}
         <div className="mt-5 text-center">
           <a
             href="#"
@@ -87,16 +80,14 @@ function LoginForm() {
           >
             Mot de passe oublié ?
           </a>
-          {/* Espace + soulignement + lien "S'inscrire" */}
           <span className="mx-1"></span>
           <span
             onClick={() => navigate("/register")}
-             className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors underline"
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium cursor-pointer transition-colors underline"
           >
             S'inscrire
           </span>
         </div>
-
       </div>
     </div>
   );
