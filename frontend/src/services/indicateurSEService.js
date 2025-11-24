@@ -24,3 +24,25 @@ export const addIndicateurSE = async (data) => {
     throw error;
   }
 };
+
+// Modifier un indicateur SE
+export const updateIndicateurSE = async (id, data) => {
+  try {
+    const response = await axios.put(`${API_URL}${id}/`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'indicateur SE :", error);
+    throw error;
+  }
+};
+
+// Supprimer un indicateur SE
+export const deleteIndicateurSE = async (id) => {
+  try {
+    const response = await axios.delete(`${API_URL}${id}/`);
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l'indicateur SE :", error);
+    throw error;
+  }
+};
