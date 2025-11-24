@@ -10,6 +10,7 @@ import {
     IconTools,
     IconMoodSmile,
     IconChartBar,
+    IconGauge,
 } from "@tabler/icons-react";
 import { Button, Tooltip } from "@mantine/core";
 
@@ -24,6 +25,7 @@ const Sidebar = () => {
     const navItems = [
         { icon: <IconHome size={20} />, label: "Accueil", to: "/home" },
         { icon: <IconBuilding size={20} />, label: "Département", to: "/departement" },
+        { icon: <IconGauge size={20} />, label: "Indicateurs", to: "/indicateurs" },
         { icon: <IconTools size={20} />, label: "Savoir-faire", to: "/savoir-faire" },
         { icon: <IconMoodSmile size={20} />, label: "Savoir-être", to: "/savoir-etre" },
         { icon: <IconChartBar size={20} />, label: "Évaluation", to: "/evaluation" },
@@ -38,9 +40,8 @@ const Sidebar = () => {
 
     return (
         <div
-            className={`h-screen bg-white border-r border-gray-100 flex flex-col transition-all duration-300 ${
-                collapsed ? "w-16" : "w-64"
-            }`}
+            className={`h-screen bg-white border-r border-gray-100 flex flex-col transition-all duration-300 ${collapsed ? "w-16" : "w-64"
+                }`}
         >
             {/* En-tête */}
             <div className="p-4 border-b border-gray-100 flex justify-between items-center">
@@ -53,9 +54,8 @@ const Sidebar = () => {
                     variant="subtle"
                     size="compact-sm"
                     onClick={toggleSidebar}
-                    className={`hover:bg-gray-50 transition-colors ${
-                        collapsed ? "text-gray-600" : "text-blue-600"
-                    }`}
+                    className={`hover:bg-gray-50 transition-colors ${collapsed ? "text-gray-600" : "text-blue-600"
+                        }`}
                 >
                     {collapsed ? <IconChevronRight size={18} /> : <IconChevronLeft size={18} />}
                 </Button>
@@ -75,10 +75,9 @@ const Sidebar = () => {
                         <NavLink
                             to={item.to}
                             className={({ isActive }) =>
-                                `flex items-center px-4 py-2 mx-2 my-1 rounded-lg transition-colors ${
-                                    isActive
-                                        ? "bg-blue-50 text-blue-600 font-medium"
-                                        : "text-gray-600 hover:bg-gray-50"
+                                `flex items-center px-4 py-2 mx-2 my-1 rounded-lg transition-colors ${isActive
+                                    ? "bg-blue-50 text-blue-600 font-medium"
+                                    : "text-gray-600 hover:bg-gray-50"
                                 }`
                             }
                         >
