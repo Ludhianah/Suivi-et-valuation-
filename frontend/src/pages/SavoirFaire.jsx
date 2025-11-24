@@ -20,8 +20,6 @@ import {
 } from "../services/savoirFaireService";
 import { getDepartements } from "../services/departementService";
 import { getIndicateurSF } from "../services/indicateurSFService";
-
-// Import toast
 import toast, { Toaster } from "react-hot-toast";
 
 const SavoirFaire = () => {
@@ -35,6 +33,10 @@ const SavoirFaire = () => {
   const [editId, setEditId] = useState(null);
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // ⚠️ Modal de confirmation suppression
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -111,11 +113,18 @@ const SavoirFaire = () => {
     setOpened(true);
   };
 
-  const handleDeleteClick = async (id) => {
-    if (!window.confirm("Supprimer ce savoir-faire ?")) return;
+  // ⚠️ Préparer la suppression
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteModalOpen(true);
+  };
+
+  // ⚠️ Confirmer la suppression
+  const confirmDelete = async () => {
+    if (!deleteId) return;
     setLoading(true);
     try {
-      await deleteSavoirFaire(id);
+      await deleteSavoirFaire(deleteId);
       toast.success("Savoir-Faire supprimé !");
       fetchData();
     } catch (error) {
@@ -123,17 +132,16 @@ const SavoirFaire = () => {
       toast.error("Erreur lors de la suppression !");
     } finally {
       setLoading(false);
+      setDeleteModalOpen(false);
+      setDeleteId(null);
     }
   };
 
   return (
     <div className="min-h-screen bg-white p-6">
-      {/* Toaster */}
       <Toaster position="top-right" reverseOrder={false} />
-
       <LoadingOverlay visible={loading} overlayBlur={2} />
 
-      {/* En-tête */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
         <Title order={2} className="text-gray-800 font-medium">
           Savoir-Faire
@@ -156,21 +164,21 @@ const SavoirFaire = () => {
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th className="font-medium text-gray-600">Département</Table.Th>
-              <Table.Th className="font-medium text-gray-600">Indicateur</Table.Th>
-              <Table.Th className="font-medium text-gray-600">Objectif</Table.Th>
-              <Table.Th className="font-medium text-gray-600">Poids (%)</Table.Th>
-              <Table.Th className="font-medium text-gray-600 text-center">Actions</Table.Th>
+              <Table.Th>Département</Table.Th>
+              <Table.Th>Indicateur</Table.Th>
+              <Table.Th>Objectif</Table.Th>
+              <Table.Th>Poids (%)</Table.Th>
+              <Table.Th className="text-center">Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {savoirFaires.length > 0 ? (
               savoirFaires.map((sf) => (
-                <Table.Tr key={sf.id} className="hover:bg-gray-50 transition-colors duration-150">
-                  <Table.Td className="text-gray-700">{sf.nom_departement}</Table.Td>
-                  <Table.Td className="text-gray-700">{sf.nom_indicateur}</Table.Td>
-                  <Table.Td className="text-gray-700">{sf.objectif}</Table.Td>
-                  <Table.Td className="text-gray-700">{sf.poids_pourcentage}</Table.Td>
+                <Table.Tr key={sf.id}>
+                  <Table.Td>{sf.nom_departement}</Table.Td>
+                  <Table.Td>{sf.nom_indicateur}</Table.Td>
+                  <Table.Td>{sf.objectif}</Table.Td>
+                  <Table.Td>{sf.poids_pourcentage}</Table.Td>
                   <Table.Td className="text-center">
                     <Group spacing={0} position="center">
                       <ActionIcon variant="subtle" color="blue" onClick={() => handleEdit(sf)} className="p-0">
@@ -194,78 +202,67 @@ const SavoirFaire = () => {
         </Table>
       </div>
 
-      {/* Modal */}
+      {/* Modal ajout / modification */}
       <Modal
         opened={opened}
         onClose={resetForm}
-        title={
-          <Title order={4} className="text-gray-800 font-medium">
-            {editId ? "Modifier le Savoir-Faire" : "Ajouter un Savoir-Faire"}
-          </Title>
-        }
+        title={editId ? "Modifier le Savoir-Faire" : "Ajouter un Savoir-Faire"}
         centered
-        radius="md"
-        shadow="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-5">
           <Select
             label="Département"
             placeholder="Choisir un département"
-            data={departements.map((d) => ({
-              value: d.id.toString(),
-              label: d.nom_departement,
-            }))}
+            data={departements.map((d) => ({ value: d.id.toString(), label: d.nom_departement }))}
             value={departementId}
             onChange={setDepartementId}
             required
-            className="w-full"
-            searchable
-            radius="md"
           />
           <Select
             label="Indicateur"
             placeholder="Choisir un indicateur"
-            data={indicateurs.map((i) => ({
-              value: i.id.toString(),
-              label: i.nom_indicateur,
-            }))}
+            data={indicateurs.map((i) => ({ value: i.id.toString(), label: i.nom_indicateur }))}
             value={nomIndicateur}
             onChange={setNomIndicateur}
             required
-            className="w-full"
-            searchable
-            radius="md"
           />
-          <TextInput
-            label="Objectif"
-            placeholder="Objectif du savoir-faire"
-            value={objectif}
-            onChange={(e) => setObjectif(e.target.value)}
-            required
-            className="w-full"
-            radius="md"
-          />
+          <TextInput label="Objectif" value={objectif} onChange={(e) => setObjectif(e.target.value)} required />
           <TextInput
             label="Poids (%)"
-            placeholder="Poids en pourcentage"
             value={poids}
-            onChange={(e) => setPoids(e.target.value)}
-            required
-            className="w-full"
             type="number"
             min="0"
             max="100"
-            radius="md"
+            onChange={(e) => setPoids(e.target.value)}
+            required
           />
-          <Group justify="flex-end" mt="md">
-            <Button type="button" variant="outline" onClick={resetForm} className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors" radius="md">
+          <Group justify="flex-end">
+            <Button variant="outline" onClick={resetForm}>
               Annuler
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 transition-colors text-white" radius="md">
+            <Button type="submit" className="bg-blue-600 text-white">
               {editId ? "Modifier" : "Ajouter"}
             </Button>
           </Group>
         </form>
+      </Modal>
+
+      {/* Modal de confirmation suppression */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Confirmer la suppression"
+        centered
+      >
+        <TextInput value="Voulez-vous vraiment supprimer ce Savoir-Faire ?" readOnly variant="unstyled" />
+        <Group justify="flex-end" mt="md">
+          <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
+            Annuler
+          </Button>
+          <Button color="red" onClick={confirmDelete}>
+            Supprimer
+          </Button>
+        </Group>
       </Modal>
     </div>
   );

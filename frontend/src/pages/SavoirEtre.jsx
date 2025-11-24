@@ -10,6 +10,7 @@ import {
   rem,
   LoadingOverlay,
   Select,
+  Text,
 } from "@mantine/core";
 import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
 
@@ -20,10 +21,8 @@ import {
   deleteSavoirEtre,
 } from "../services/savoirEtreService";
 
-// ⚠️ Correction ici : getIndicateursSE
 import { getIndicateursSE } from "../services/indicateurSEService";
 
-// Import toast
 import toast, { Toaster } from "react-hot-toast";
 
 const SavoirEtre = () => {
@@ -35,6 +34,10 @@ const SavoirEtre = () => {
   const [editId, setEditId] = useState(null);
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // ---------------- Confirmation delete ----------------
+  const [deleteModalOpened, setDeleteModalOpened] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   // Charger les Savoir-Être
   const fetchSavoirEtre = async () => {
@@ -54,7 +57,7 @@ const SavoirEtre = () => {
   // Charger les indicateurs SE
   const fetchIndicateurs = async () => {
     try {
-      const data = await getIndicateursSE(); // ✔ correction ici
+      const data = await getIndicateursSE();
       setIndicateurs(Array.isArray(data) ? data : data.results || []);
     } catch (error) {
       console.error("Erreur chargement indicateurs :", error);
@@ -114,12 +117,15 @@ const SavoirEtre = () => {
     setOpened(true);
   };
 
-  const handleDeleteClick = async (id) => {
-    if (!window.confirm("Supprimer ce savoir-être ?")) return;
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteModalOpened(true);
+  };
 
+  const confirmDelete = async () => {
     setLoading(true);
     try {
-      await deleteSavoirEtre(id);
+      await deleteSavoirEtre(deleteId);
       toast.success("Savoir-Être supprimé !");
       fetchSavoirEtre();
     } catch (error) {
@@ -127,6 +133,8 @@ const SavoirEtre = () => {
       toast.error("Erreur lors de la suppression !");
     } finally {
       setLoading(false);
+      setDeleteModalOpened(false);
+      setDeleteId(null);
     }
   };
 
@@ -195,11 +203,14 @@ const SavoirEtre = () => {
         </Table>
       </div>
 
-      {/* Modal */}
-      <Modal opened={opened} onClose={resetForm} title={<Title order={4}>{editId ? "Modifier" : "Ajouter"}</Title>} centered>
+      {/* Modal Ajouter / Modifier */}
+      <Modal
+        opened={opened}
+        onClose={resetForm}
+        title={<Title order={4}>{editId ? "Modifier" : "Ajouter"}</Title>}
+        centered
+      >
         <form onSubmit={handleSubmit} className="space-y-5">
-
-          {/* Select indicateur SE */}
           <Select
             label="Nom de l’indicateur"
             placeholder="Sélectionner un indicateur"
@@ -213,7 +224,6 @@ const SavoirEtre = () => {
             required
           />
 
-          {/* Poids */}
           <TextInput
             label="Poids (%)"
             type="number"
@@ -233,6 +243,24 @@ const SavoirEtre = () => {
             </Button>
           </Group>
         </form>
+      </Modal>
+
+      {/* Modal Confirmation suppression */}
+      <Modal
+        opened={deleteModalOpened}
+        onClose={() => setDeleteModalOpened(false)}
+        title="Confirmation de suppression"
+        centered
+      >
+        <Text>Voulez-vous vraiment supprimer ce savoir-être ?</Text>
+        <Group position="right" mt="md">
+          <Button variant="outline" onClick={() => setDeleteModalOpened(false)}>
+            Annuler
+          </Button>
+          <Button color="red" onClick={confirmDelete}>
+            Supprimer
+          </Button>
+        </Group>
       </Modal>
     </div>
   );

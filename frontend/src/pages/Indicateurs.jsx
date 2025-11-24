@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import {
   Table,
   Button,
-  TextInput,
   Group,
   Title,
   Modal,
@@ -15,6 +14,8 @@ import { IconPlus, IconEdit, IconTrash } from "@tabler/icons-react";
 
 // --- Import toast ---
 import toast, { Toaster } from "react-hot-toast";
+// --- Import modal ---
+import IndicateurModal from "../components/IndicateurModal";
 
 import {
   getIndicateurSF,
@@ -47,6 +48,37 @@ const Indicateurs = () => {
   const [seNom, setSeNom] = useState("");
   const [seDescription, setSeDescription] = useState("");
   const [editingSE, setEditingSE] = useState(null);
+
+  // --------------------- CONFIRM DELETE -----------------
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState({ type: "", id: null });
+
+  const confirmDelete = (type, id) => {
+    setDeleteTarget({ type, id });
+    setOpenConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    const { type, id } = deleteTarget;
+
+    try {
+      if (type === "SF") {
+        await deleteIndicateurSF(id);
+        loadSF();
+        toast.success("Indicateur SF supprimé avec succès !");
+      } else if (type === "SE") {
+        await deleteIndicateurSE(id);
+        loadSE();
+        toast.success("Indicateur SE supprimé avec succès !");
+      }
+    } catch (error) {
+      console.error("Erreur suppression indicateur :", error);
+      toast.error("Erreur lors de la suppression de l'indicateur");
+    } finally {
+      setOpenConfirm(false);
+      setDeleteTarget({ type: "", id: null });
+    }
+  };
 
   // ---------------------- LOAD DATA ---------------------
   useEffect(() => {
@@ -123,18 +155,6 @@ const Indicateurs = () => {
     }
   };
 
-  const handleDeleteSF = async (id) => {
-    if (!confirm("Voulez-vous vraiment supprimer cet indicateur SF ?")) return;
-    try {
-      await deleteIndicateurSF(id);
-      loadSF();
-      toast.success("Indicateur SF supprimé avec succès !");
-    } catch (error) {
-      console.error("Erreur suppression indicateur SF :", error);
-      toast.error("Erreur lors de la suppression de l'indicateur SF");
-    }
-  };
-
   const resetSFModal = () => {
     setOpenModalSF(false);
     setEditingSF(null);
@@ -180,18 +200,6 @@ const Indicateurs = () => {
     } catch (error) {
       console.error("Erreur mise à jour indicateur SE :", error);
       toast.error("Erreur lors de la mise à jour de l'indicateur SE");
-    }
-  };
-
-  const handleDeleteSE = async (id) => {
-    if (!confirm("Voulez-vous vraiment supprimer cet indicateur SE ?")) return;
-    try {
-      await deleteIndicateurSE(id);
-      loadSE();
-      toast.success("Indicateur SE supprimé avec succès !");
-    } catch (error) {
-      console.error("Erreur suppression indicateur SE :", error);
-      toast.error("Erreur lors de la suppression de l'indicateur SE");
     }
   };
 
@@ -259,7 +267,7 @@ const Indicateurs = () => {
                       <ActionIcon
                         variant="subtle"
                         color="red"
-                        onClick={() => handleDeleteSF(item.id)}
+                        onClick={() => confirmDelete("SF", item.id)}
                       >
                         <IconTrash style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
@@ -324,7 +332,7 @@ const Indicateurs = () => {
                       <ActionIcon
                         variant="subtle"
                         color="red"
-                        onClick={() => handleDeleteSE(item.id)}
+                        onClick={() => confirmDelete("SE", item.id)}
                       >
                         <IconTrash style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
@@ -343,84 +351,51 @@ const Indicateurs = () => {
         </Table>
       </div>
 
-      {/* -------------------- MODAL SF --------------------- */}
-      <Modal
+      {/* -------------------- MODALS --------------------- */}
+      <IndicateurModal
         opened={openModalSF}
         onClose={resetSFModal}
-        title={
-          <Title order={4}>
-            {editingSF ? "Modifier un indicateur SF" : "Ajouter un indicateur SF"}
-          </Title>
-        }
-        centered
-      >
-        <div className="space-y-4">
-          <TextInput
-            label="Nom de l'indicateur"
-            placeholder="Ex : Chiffre d'affaires"
-            value={sfNom}
-            onChange={(e) => setSfNom(e.target.value)}
-            required
-          />
-          <TextInput
-            label="Description"
-            placeholder="Ex : Montant total des ventes"
-            value={sfDescription}
-            onChange={(e) => setSfDescription(e.target.value)}
-          />
-          <TextInput
-            label="Unité"
-            placeholder="Ex : AR"
-            value={sfUnite}
-            onChange={(e) => setSfUnite(e.target.value)}
-          />
+        title={editingSF ? "Modifier un indicateur SF" : "Ajouter un indicateur SF"}
+        nom={sfNom}
+        setNom={setSfNom}
+        description={sfDescription}
+        setDescription={setSfDescription}
+        unite={sfUnite}
+        setUnite={setSfUnite}
+        onSubmit={editingSF ? handleUpdateSF : handleAddSF}
+        showUnite={true}
+        submitText={editingSF ? "Mettre à jour" : "Enregistrer"}
+      />
 
-          <Group justify="flex-end">
-            <Button
-              onClick={editingSF ? handleUpdateSF : handleAddSF}
-              className="bg-blue-600 text-white"
-            >
-              {editingSF ? "Mettre à jour" : "Enregistrer"}
-            </Button>
-          </Group>
-        </div>
-      </Modal>
-
-      {/* -------------------- MODAL SE --------------------- */}
-      <Modal
+      <IndicateurModal
         opened={openModalSE}
         onClose={resetSEModal}
-        title={
-          <Title order={4}>
-            {editingSE ? "Modifier un indicateur SE" : "Ajouter un indicateur SE"}
-          </Title>
-        }
+        title={editingSE ? "Modifier un indicateur SE" : "Ajouter un indicateur SE"}
+        nom={seNom}
+        setNom={setSeNom}
+        description={seDescription}
+        setDescription={setSeDescription}
+        onSubmit={editingSE ? handleUpdateSE : handleAddSE}
+        showUnite={false}
+        submitText={editingSE ? "Mettre à jour" : "Enregistrer"}
+      />
+
+      {/* -------------------- CONFIRM DELETE MODAL --------------------- */}
+      <Modal
+        opened={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+        title="Confirmation de suppression"
         centered
       >
-        <div className="space-y-4">
-          <TextInput
-            label="Nom de l'indicateur"
-            placeholder="Ex : Capacité à travailler sans supervision"
-            value={seNom}
-            onChange={(e) => setSeNom(e.target.value)}
-            required
-          />
-          <TextInput
-            label="Description"
-            placeholder="Ex : Capacité à travailler en autonomie"
-            value={seDescription}
-            onChange={(e) => setSeDescription(e.target.value)}
-          />
-
-          <Group justify="flex-end">
-            <Button
-              onClick={editingSE ? handleUpdateSE : handleAddSE}
-              className="bg-blue-600 text-white"
-            >
-              {editingSE ? "Mettre à jour" : "Enregistrer"}
-            </Button>
-          </Group>
-        </div>
+        <p>Voulez-vous vraiment supprimer cet indicateur ?</p>
+        <Group position="right" mt="md">
+          <Button variant="outline" onClick={() => setOpenConfirm(false)}>
+            Annuler
+          </Button>
+          <Button color="red" onClick={handleConfirmDelete}>
+            Supprimer
+          </Button>
+        </Group>
       </Modal>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   rem,
   Box,
   Flex,
+  Text,
 } from "@mantine/core";
 import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
 import {
@@ -27,6 +28,10 @@ const Departement = () => {
   const [nom, setNom] = useState("");
   const [editId, setEditId] = useState(null);
   const [opened, setOpened] = useState(false);
+
+  // 👉 NEW : modal de confirmation suppression
+  const [openedConfirmDelete, setOpenedConfirmDelete] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -69,12 +74,19 @@ const Departement = () => {
     setOpened(true);
   };
 
-  const handleDeleteClick = async (id) => {
-    if (!window.confirm("Supprimer ce département ?")) return;
+  // 👉 NEW : ouverture du modal de confirmation
+  const handleDeleteClick = (id) => {
+    setSelectedId(id);
+    setOpenedConfirmDelete(true);
+  };
+
+  // 👉 NEW : suppression confirmée
+  const confirmDelete = async () => {
     try {
-      await deleteDepartement(id);
-      fetchData();
+      await deleteDepartement(selectedId);
       toast.success("Département supprimé !");
+      setOpenedConfirmDelete(false);
+      fetchData();
     } catch (error) {
       console.error("Erreur suppression :", error);
       toast.error("Erreur lors de la suppression du département");
@@ -86,7 +98,7 @@ const Departement = () => {
       {/* Toaster */}
       <Toaster position="top-right" reverseOrder={false} />
 
-      {/* En-tête avec titre et bouton "Ajouter" */}
+      {/* En-tête */}
       <Flex justify="space-between" align="center" mb="lg">
         <Title order={2} className="text-gray-800">
           Départements
@@ -104,7 +116,7 @@ const Departement = () => {
         </Button>
       </Flex>
 
-      {/* Tableau des départements */}
+      {/* Tableau */}
       <Box className="rounded-lg shadow-sm overflow-hidden">
         <Table striped highlightOnHover withTableBorder>
           <Table.Thead>
@@ -176,6 +188,27 @@ const Departement = () => {
             </Button>
           </Group>
         </form>
+      </Modal>
+
+      {/* NEW — Modal de confirmation suppression */}
+      <Modal
+        opened={openedConfirmDelete}
+        onClose={() => setOpenedConfirmDelete(false)}
+        title="Confirmer la suppression"
+        centered
+      >
+        <Text size="sm" mb="md">
+          Voulez-vous vraiment supprimer ce département ?
+        </Text>
+
+        <Group justify="flex-end">
+          <Button variant="default" onClick={() => setOpenedConfirmDelete(false)}>
+            Annuler
+          </Button>
+          <Button color="red" onClick={confirmDelete}>
+            Supprimer
+          </Button>
+        </Group>
       </Modal>
     </Box>
   );
