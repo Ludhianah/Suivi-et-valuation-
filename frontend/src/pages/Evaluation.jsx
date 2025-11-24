@@ -135,7 +135,13 @@ const Evaluation = () => {
       </Group>
 
       {/* MODALE */}
-      <Modal opened={opened} onClose={() => setOpened(false)} size="xl" title="Créer une évaluation">
+      <Modal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        size="xl"
+        title={<Title order={4} fw={700}>Créer une évaluation</Title>}
+      >
+
         <Title order={5}>Informations générales</Title>
 
         <Select
@@ -183,7 +189,7 @@ const Evaluation = () => {
         {/* DETAILS SF */}
         <Title order={5}>Détails Savoir-Faire</Title>
         {indicateursSF.map((sf) => (
-          <Card key={sf.id} withBorder radius="md" p="sm" className="my-2">
+          <div key={sf.id} className="my-2">
             <Text fw={500}>{sf.nom_indicateur}</Text>
 
             <NumberInput
@@ -208,7 +214,7 @@ const Evaluation = () => {
                 }))
               }
             />
-          </Card>
+          </div>
         ))}
 
         <Divider my="md" />
@@ -216,7 +222,7 @@ const Evaluation = () => {
         {/* DETAILS SE */}
         <Title order={5}>Détails Savoir-Être</Title>
         {indicateursSE.map((se) => (
-          <Card key={se.id} withBorder radius="md" p="sm" className="my-2">
+          <div key={se.id} className="my-2">
             <Text fw={500}>{se.nom_indicateur}</Text>
 
             <NumberInput
@@ -241,8 +247,9 @@ const Evaluation = () => {
                 }))
               }
             />
-          </Card>
+          </div>
         ))}
+
 
         <Button fullWidth className="mt-3" onClick={handleSubmit}>
           Créer l’évaluation
@@ -283,8 +290,8 @@ const Evaluation = () => {
                         evalItem.note_globale >= 80
                           ? "green"
                           : evalItem.note_globale >= 50
-                          ? "yellow"
-                          : "red"
+                            ? "yellow"
+                            : "red"
                       }
                       variant="light"
                     >
