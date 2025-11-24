@@ -7,6 +7,7 @@ import Departement from "./pages/Departement";
 import SavoirFaire from "./pages/SavoirFaire";
 import SavoirEtre from "./pages/SavoirEtre";
 import Evaluation from "./pages/Evaluation";
+import Indicateurs from "./pages/Indicateurs"; // <-- Import ajouté
 import Layout from "./components/Layout";
 import ProtectedRoute from "./security/ProtectedRoute";
 import PublicRoute from "./security/PublicRoute";
@@ -46,6 +47,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/departement"
           element={
@@ -101,8 +103,21 @@ function App() {
             </ProtectedRoute>
           }
         />
-       
 
+        {/* Nouvelle route pour Indicateurs */}
+        <Route
+          path="/indicateurs"
+          element={
+            <ProtectedRoute>
+              <div className="flex h-screen">
+                <Sidebar />
+                <div className="flex-1 overflow-auto p-4">
+                  <Indicateurs />
+                </div>
+              </div>
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
