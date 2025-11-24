@@ -34,3 +34,25 @@ export const addIndicateurSF = async (data) => {
     throw error;
   }
 };
+
+// 🔹 Modifier un Indicateur SF
+export const updateIndicateurSF = async (id, data) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id}/`, data, getConfig());
+    return response.data;
+  } catch (error) {
+    console.error("Erreur updateIndicateurSF :", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// 🔹 Supprimer un Indicateur SF
+export const deleteIndicateurSF = async (id) => {
+  try {
+    const response = await axios.delete(`${API_URL}/${id}/`, getConfig());
+    return response.data;
+  } catch (error) {
+    console.error("Erreur deleteIndicateurSF :", error.response?.data || error.message);
+    throw error;
+  }
+};
