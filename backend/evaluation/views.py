@@ -16,45 +16,50 @@ from .serializers import (
     EvaluationSerializer, EvaluationSFDetailSerializer, EvaluationSEDetailSerializer
 )
 
-
 # =============================================================================
 # INDICATEUR SAVOIR-FAIRE (IndicateurSF)
 # =============================================================================
-@api_view(['GET', 'POST'])
-@permission_classes([AllowAny])  # TODO: À restreindre en production (ex: IsAuthenticated)
+@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([AllowAny])
 def indicateur_sf_api(request, pk=None):
-    """
-    API pour gérer les IndicateurSF :
-    - GET /indicateur-sf/        → Liste tous les indicateurs SF
-    - GET /indicateur-sf/<pk>/   → Détail d'un indicateur SF
-    - POST /indicateur-sf/       → Création d'un nouvel indicateur SF
-    """
     if request.method == 'GET':
         if pk:
-            # Récupération d'un seul objet par PK
             try:
                 obj = IndicateurSF.objects.get(pk=pk)
                 serializer = IndicateurSFSerializer(obj)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except IndicateurSF.DoesNotExist:
-                return Response(
-                    {"detail": "IndicateurSF non trouvé."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                return Response({"detail": "IndicateurSF non trouvé."}, status=status.HTTP_404_NOT_FOUND)
         else:
-            # Liste complète
             qs = IndicateurSF.objects.all()
             serializer = IndicateurSFSerializer(qs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'POST':
-        # Création d'un nouvel indicateur
         serializer = IndicateurSFSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    elif request.method in ['PUT', 'PATCH']:
+        try:
+            obj = IndicateurSF.objects.get(pk=pk)
+        except IndicateurSF.DoesNotExist:
+            return Response({"detail": "IndicateurSF non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = IndicateurSFSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        try:
+            obj = IndicateurSF.objects.get(pk=pk)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except IndicateurSF.DoesNotExist:
+            return Response({"detail": "IndicateurSF non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
 # =============================================================================
 # SAVOIR-FAIRE (SavoirFaire)
@@ -101,16 +106,13 @@ def savoir_faire_api(request, pk=None):
         except SavoirFaire.DoesNotExist:
             return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
+
 # =============================================================================
 # INDICATEUR SAVOIR-ÊTRE (IndicateurSE)
 # =============================================================================
-@api_view(['GET', 'POST'])
+@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def indicateur_se_api(request, pk=None):
-    """
-    API pour les IndicateurSE (Savoir-Être).
-    Structure identique à IndicateurSF.
-    """
     if request.method == 'GET':
         if pk:
             try:
@@ -118,10 +120,7 @@ def indicateur_se_api(request, pk=None):
                 serializer = IndicateurSESerializer(obj)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except IndicateurSE.DoesNotExist:
-                return Response(
-                    {"detail": "IndicateurSE non trouvé."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                return Response({"detail": "IndicateurSE non trouvé."}, status=status.HTTP_404_NOT_FOUND)
         else:
             qs = IndicateurSE.objects.all()
             serializer = IndicateurSESerializer(qs, many=True)
@@ -134,6 +133,24 @@ def indicateur_se_api(request, pk=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    elif request.method in ['PUT', 'PATCH']:
+        try:
+            obj = IndicateurSE.objects.get(pk=pk)
+        except IndicateurSE.DoesNotExist:
+            return Response({"detail": "IndicateurSE non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = IndicateurSESerializer(obj, data=request.data, partial=(request.method=='PATCH'))
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        try:
+            obj = IndicateurSE.objects.get(pk=pk)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except IndicateurSE.DoesNotExist:
+            return Response({"detail": "IndicateurSE non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
 # =============================================================================
 # SAVOIR-ÊTRE (SavoirEtre)
