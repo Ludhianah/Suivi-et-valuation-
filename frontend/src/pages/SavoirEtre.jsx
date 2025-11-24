@@ -8,10 +8,11 @@ import {
   ActionIcon,
   Modal,
   rem,
-  Paper,
   LoadingOverlay,
+  Select,
 } from "@mantine/core";
 import { IconEdit, IconTrash, IconPlus } from "@tabler/icons-react";
+
 import {
   getSavoirEtres,
   createSavoirEtre,
@@ -19,17 +20,23 @@ import {
   deleteSavoirEtre,
 } from "../services/savoirEtreService";
 
+// ⚠️ Correction ici : getIndicateursSE
+import { getIndicateursSE } from "../services/indicateurSEService";
+
 const SavoirEtre = () => {
   const [savoirEtres, setSavoirEtres] = useState([]);
+  const [indicateurs, setIndicateurs] = useState([]);
+
   const [nomIndicateur, setNomIndicateur] = useState("");
   const [poids, setPoids] = useState("");
   const [editId, setEditId] = useState(null);
   const [opened, setOpened] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const fetchData = async () => {
-    setLoading(true);
+  // Charger les Savoir-Être
+  const fetchSavoirEtre = async () => {
     try {
+      setLoading(true);
       const data = await getSavoirEtres();
       setSavoirEtres(Array.isArray(data) ? data : data.results || []);
     } catch (error) {
@@ -40,26 +47,41 @@ const SavoirEtre = () => {
     }
   };
 
+  // Charger les indicateurs SE
+  const fetchIndicateurs = async () => {
+    try {
+      const data = await getIndicateursSE(); // ✔ correction ici
+      setIndicateurs(Array.isArray(data) ? data : data.results || []);
+    } catch (error) {
+      console.error("Erreur chargement indicateurs :", error);
+      setIndicateurs([]);
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchSavoirEtre();
+    fetchIndicateurs();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nomIndicateur.trim() || !poids) return;
+    if (!nomIndicateur || !poids) return;
+
     setLoading(true);
+
+    const payload = {
+      id_indicateur_se: nomIndicateur,
+      poids_pourcentage: parseFloat(poids),
+    };
+
     try {
-      const payload = {
-        id_indicateur_se: nomIndicateur,
-        poids_pourcentage: parseFloat(poids),
-      };
       if (editId) {
         await updateSavoirEtre(editId, payload);
       } else {
         await createSavoirEtre(payload);
       }
       resetForm();
-      fetchData();
+      fetchSavoirEtre();
     } catch (error) {
       console.error("Erreur sauvegarde :", error);
     } finally {
@@ -76,17 +98,18 @@ const SavoirEtre = () => {
 
   const handleEdit = (item) => {
     setEditId(item.id);
-    setNomIndicateur(item.id_indicateur_se);
-    setPoids(item.poids_pourcentage);
+    setNomIndicateur(item.id_indicateur_se.toString());
+    setPoids(item.poids_pourcentage.toString());
     setOpened(true);
   };
 
   const handleDeleteClick = async (id) => {
     if (!window.confirm("Supprimer ce savoir-être ?")) return;
+
     setLoading(true);
     try {
       await deleteSavoirEtre(id);
-      fetchData();
+      fetchSavoirEtre();
     } catch (error) {
       console.error("Erreur suppression :", error);
     } finally {
@@ -98,7 +121,7 @@ const SavoirEtre = () => {
     <div className="min-h-screen bg-white p-6">
       <LoadingOverlay visible={loading} overlayBlur={2} />
 
-      {/* En-tête */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
         <Title order={2} className="text-gray-800 font-medium">
           Savoir-Être
@@ -109,48 +132,36 @@ const SavoirEtre = () => {
             setOpened(true);
           }}
           leftSection={<IconPlus size={16} />}
-          className="bg-blue-600 hover:bg-blue-700 transition-colors text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
           radius="md"
         >
           Ajouter
         </Button>
       </div>
 
-      {/* Tableau */}
+      {/* Table */}
       <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200">
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th className="font-medium text-gray-600">Indicateur</Table.Th>
-              <Table.Th className="font-medium text-gray-600">Poids (%)</Table.Th>
-              <Table.Th className="font-medium text-gray-600 text-center">Actions</Table.Th>
+              <Table.Th>Indicateur</Table.Th>
+              <Table.Th>Poids (%)</Table.Th>
+              <Table.Th className="text-center">Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {savoirEtres.length > 0 ? (
               savoirEtres.map((se) => (
-                <Table.Tr
-                  key={se.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <Table.Td className="text-gray-700">{se.nom_indicateur}</Table.Td>
-                  <Table.Td className="text-gray-700">{se.poids_pourcentage}</Table.Td>
+                <Table.Tr key={se.id}>
+                  <Table.Td>{se.nom_indicateur}</Table.Td>
+                  <Table.Td>{se.poids_pourcentage}</Table.Td>
                   <Table.Td className="text-center">
                     <Group spacing={0} position="center">
-                      <ActionIcon
-                        variant="subtle"
-                        color="blue"
-                        onClick={() => handleEdit(se)}
-                        className="p-0 hover:bg-blue-50 transition-colors"
-                      >
+                      <ActionIcon variant="subtle" color="blue" onClick={() => handleEdit(se)}>
                         <IconEdit style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        onClick={() => handleDeleteClick(se.id)}
-                        className="p-0 hover:bg-red-50 transition-colors"
-                      >
+
+                      <ActionIcon variant="subtle" color="red" onClick={() => handleDeleteClick(se.id)}>
                         <IconTrash style={{ width: rem(16), height: rem(16) }} />
                       </ActionIcon>
                     </Group>
@@ -159,7 +170,7 @@ const SavoirEtre = () => {
               ))
             ) : (
               <Table.Tr>
-                <Table.Td colSpan={3} align="center" className="py-6 text-gray-400">
+                <Table.Td colSpan={3} align="center">
                   Aucun Savoir-Être trouvé
                 </Table.Td>
               </Table.Tr>
@@ -169,55 +180,39 @@ const SavoirEtre = () => {
       </div>
 
       {/* Modal */}
-      <Modal
-        opened={opened}
-        onClose={resetForm}
-        title={
-          <Title order={4} className="text-gray-800 font-medium">
-            {editId ? "Modifier le Savoir-Être" : "Ajouter un Savoir-Être"}
-          </Title>
-        }
-        centered
-        radius="md"
-        shadow="lg"
-      >
+      <Modal opened={opened} onClose={resetForm} title={<Title order={4}>{editId ? "Modifier" : "Ajouter"}</Title>} centered>
         <form onSubmit={handleSubmit} className="space-y-5">
-          <TextInput
-            label="Nom de l'indicateur"
-            placeholder="Nom de l'indicateur"
+
+          {/* Select indicateur SE */}
+          <Select
+            label="Nom de l’indicateur"
+            placeholder="Sélectionner un indicateur"
+            data={indicateurs.map((i) => ({
+              value: i.id.toString(),
+              label: i.nom_indicateur,
+            }))}
             value={nomIndicateur}
-            onChange={(e) => setNomIndicateur(e.target.value)}
+            onChange={setNomIndicateur}
+            searchable
             required
-            className="w-full"
-            radius="md"
           />
+
+          {/* Poids */}
           <TextInput
             label="Poids (%)"
-            placeholder="Poids en pourcentage"
-            value={poids}
-            onChange={(e) => setPoids(e.target.value)}
-            required
-            className="w-full"
             type="number"
             min="0"
             max="100"
-            radius="md"
+            value={poids}
+            onChange={(e) => setPoids(e.target.value)}
+            required
           />
-          <Group justify="flex-end" mt="md">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={resetForm}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-              radius="md"
-            >
+
+          <Group justify="flex-end">
+            <Button variant="outline" onClick={resetForm}>
               Annuler
             </Button>
-            <Button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 transition-colors text-white"
-              radius="md"
-            >
+            <Button type="submit" className="bg-blue-600 text-white">
               {editId ? "Modifier" : "Ajouter"}
             </Button>
           </Group>
