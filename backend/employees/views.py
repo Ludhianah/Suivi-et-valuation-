@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.models import User
-from .models import Departement, Employe
-from .serializers import UserSerializer, DepartementSerializer, EmployeSerializer
+from .models import Service, Employe  # <-- Remplacé Departement par Service
+from .serializers import UserSerializer, ServiceSerializer, EmployeSerializer
 
 
 # ===============================
@@ -58,54 +58,56 @@ def employees_list_create(request):
 
 
 # ===============================
-# 🔹 DÉPARTEMENTS
+# 🔹 SERVICES
 # ===============================
 
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
-def departements_list_create(request):
+def services_list_create(request):
     """
-    ✅ Lister tous les départements (GET)
-    ✅ Créer un nouveau département (POST)
-    URL : /api/departements/
+    ✅ Lister tous les services (GET)
+    ✅ Créer un nouveau service (POST)
+    URL : /api/services/
     """
     if request.method == 'GET':
-        departements = Departement.objects.all()
-        serializer = DepartementSerializer(departements, many=True)
+        services = Service.objects.all()
+        serializer = ServiceSerializer(services, many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = DepartementSerializer(data=request.data)
+        serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid():
-            departement = serializer.save()
-            return Response(DepartementSerializer(departement).data, status=status.HTTP_201_CREATED)
+            service = serializer.save()
+            return Response(ServiceSerializer(service).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# 🔹 Récupérer, modifier et supprimer un département
+
+
+# 🔹 Récupérer, modifier et supprimer un service
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([AllowAny])
-def departement_detail(request, pk):
+def service_detail(request, pk):
     """
-    ✅ GET : Récupérer un département
-    ✅ PUT : Modifier un département
-    ✅ DELETE : Supprimer un département
-    URL : /api/departements/<pk>/
+    ✅ GET : Récupérer un service
+    ✅ PUT : Modifier un service
+    ✅ DELETE : Supprimer un service
+    URL : /api/services/<pk>/
     """
     try:
-        departement = Departement.objects.get(pk=pk)
-    except Departement.DoesNotExist:
-        return Response({"error": "Département non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+        service = Service.objects.get(pk=pk)
+    except Service.DoesNotExist:
+        return Response({"error": "Service non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = DepartementSerializer(departement)
+        serializer = ServiceSerializer(service)
         return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = DepartementSerializer(departement, data=request.data)
+        serializer = ServiceSerializer(service, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
-        departement.delete()
-        return Response({"message": "Département supprimé"}, status=status.HTTP_204_NO_CONTENT)
+        service.delete()
+        return Response({"message": "Service supprimé"}, status=status.HTTP_204_NO_CONTENT)

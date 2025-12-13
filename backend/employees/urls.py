@@ -8,9 +8,7 @@ urlpatterns = [
     # 🔹 EMPLOYÉS
     path('employees/', views.employees_list_create, name='employees_list_create'),
 
-    # 🔹 DÉPARTEMENTS
-    path('departements/', views.departements_list_create, name='departements_list_create'),
-    
-    # Récupérer, modifier, supprimer
-    path('departements/<int:pk>/', views.departement_detail, name='departement_detail'),
+    # 🔹 SERVICES (anciennement départements)
+    path('services/', views.services_list_create, name='services_list_create'),
+    path('services/<int:pk>/', views.service_detail, name='service_detail'),
 ]

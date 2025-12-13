@@ -1,46 +1,51 @@
 # employees/admin.py
 from django.contrib import admin
-from .models import Departement, Employe
+from .models import Service, Employe  # <-- Remplacé Departement par Service
 
-
-@admin.register(Departement)
-class DepartementAdmin(admin.ModelAdmin):
+# -------------------------------
+# Admin pour Service
+# -------------------------------
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
     """
-    Admin pour les départements
+    Admin pour les services (anciennement départements)
     """
-    list_display = ('id', 'nom_departement', 'date_creation')
-    search_fields = ('nom_departement',)
-    list_filter = ('date_creation',)
-    ordering = ('nom_departement',)
+    list_display = ('id', 'nom_service', 'date_creation')  # Colonnes visibles
+    search_fields = ('nom_service',)                        # Recherche par nom
+    list_filter = ('date_creation',)                        # Filtres
+    ordering = ('nom_service',)                             # Tri par défaut
 
 
+# -------------------------------
+# Admin pour Employe
+# -------------------------------
 @admin.register(Employe)
 class EmployeAdmin(admin.ModelAdmin):
     """
-    Admin pour les employés – adapté à ton modèle sans date_modification
+    Admin pour les employés – adapté à ton modèle avec service
     """
-    # Colonnes visibles
+    # Colonnes visibles dans la liste
     list_display = (
         'matricule',
-        'nom_complet',        # Méthode personnalisée
+        'nom_complet',  # Méthode personnalisée pour Nom + Prénom
         'poste',
-        'departement',        # Nom du département
+        'service',      # Nom du service
         'email',
         'actif',
         'date_embauche'
     )
 
-    # Recherche
+    # Champs utilisés pour la recherche
     search_fields = ('matricule', 'nom', 'prenom', 'email', 'poste')
 
     # Filtres à droite
     list_filter = (
-        'id_departement__nom_departement',  # CORRIGÉ : bon champ FK
+        'service__nom_service',  # Champ FK Service
         'actif',
         'date_embauche'
     )
 
-    # Champ en lecture seule (existe dans ton modèle)
+    # Champs en lecture seule
     readonly_fields = ('date_creation',)
 
     # === Méthode : Nom complet ===
@@ -50,8 +55,8 @@ class EmployeAdmin(admin.ModelAdmin):
         return f"{obj.nom} {prenom}".strip()
     nom_complet.short_description = 'Nom complet'
 
-    # === Méthode : Nom du département ===
-    def departement(self, obj):
-        """Retourne le nom du département ou '-'"""
-        return obj.id_departement.nom_departement if obj.id_departement else '-'
-    departement.short_description = 'Département'
+    # === Méthode : Nom du service ===
+    def service(self, obj):
+        """Retourne le nom du service ou '-'"""
+        return obj.service.nom_service if obj.service else '-'
+    service.short_description = 'Service'

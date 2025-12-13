@@ -1,39 +1,47 @@
-# evaluation/admin.py
 from django.contrib import admin
-from .models import (
-    IndicateurSF, IndicateurSE,
-    SavoirFaire, SavoirEtre,
-    Evaluation, EvaluationSFDetail, EvaluationSEDetail
-)
+from .models import IndicateurSF, IndicateurSE, SavoirFaire, SavoirEtre, Evaluation
 
-
+# Indicateur SF
 @admin.register(IndicateurSF)
 class IndicateurSFAdmin(admin.ModelAdmin):
     list_display = ('id', 'nom_indicateur', 'unite_mesure')
     search_fields = ('nom_indicateur',)
     list_filter = ('unite_mesure',)
 
-
+# Savoir-Faire
 @admin.register(SavoirFaire)
 class SavoirFaireAdmin(admin.ModelAdmin):
-    list_display = ('id', 'departement', 'indicateur', 'poids_pourcentage', 'objectif')
-    search_fields = ('id_departement__nom_departement', 'id_indicateur_sf__nom_indicateur')
-    
-    # CORRIGÉ : bon champ
-    list_filter = ('id_departement__nom_departement',)
+    list_display = ('id', 'service', 'indicateur', 'poids_pourcentage', 'objectif')
+    search_fields = ('id_service__nom_service', 'id_indicateur_sf__nom_indicateur')
+    list_filter = ('id_service__nom_service',)
 
-    def departement(self, obj):
-        return obj.id_departement.nom_departement
-    departement.short_description = 'Département'
+    def service(self, obj):
+        return obj.id_service.nom_service
+    service.short_description = 'Service'
 
     def indicateur(self, obj):
         return obj.id_indicateur_sf.nom_indicateur
     indicateur.short_description = 'Indicateur SF'
 
+# Indicateur SE
+@admin.register(IndicateurSE)
+class IndicateurSEAdmin(admin.ModelAdmin):
+    list_display = ('id', 'nom_indicateur')
+    search_fields = ('nom_indicateur',)
 
+# Savoir-Être
+@admin.register(SavoirEtre)
+class SavoirEtreAdmin(admin.ModelAdmin):
+    list_display = ('id', 'indicateur', 'poids_pourcentage')
+    
+    def indicateur(self, obj):
+        return obj.id_indicateur_se.nom_indicateur
+    indicateur.short_description = 'Critère SE'
+
+# Évaluation
 @admin.register(Evaluation)
 class EvaluationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'employe', 'mois_annee', 'note_sf', 'note_se', 'note_globale')
+    list_display = ('id', 'employe', 'mois_annee', 'id_indicateur', 'objectif', 'realisation', 'note_percent')
     search_fields = ('id_employe__nom', 'id_employe__prenom', 'id_employe__matricule')
     list_filter = ('annee', 'mois')
 
@@ -44,41 +52,3 @@ class EvaluationAdmin(admin.ModelAdmin):
     def mois_annee(self, obj):
         return f"{obj.get_mois_display()} {obj.annee}"
     mois_annee.short_description = 'Période'
-
-
-@admin.register(EvaluationSFDetail)
-class EvaluationSFDetailAdmin(admin.ModelAdmin):
-    list_display = ('id', 'evaluation', 'indicateur', 'note', 'note_ponderee')
-    list_filter = ('id_sf__id_indicateur_sf__nom_indicateur',)
-
-    def evaluation(self, obj):
-        return f"Éval #{obj.id_evaluation.id}"
-    evaluation.short_description = 'Évaluation'
-
-    def indicateur(self, obj):
-        return obj.id_sf.id_indicateur_sf.nom_indicateur
-    indicateur.short_description = 'Critère'
-
-
-# Autres modèles (SE) → même principe
-@admin.register(IndicateurSE)
-class IndicateurSEAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nom_indicateur')
-    search_fields = ('nom_indicateur',)
-
-
-@admin.register(SavoirEtre)
-class SavoirEtreAdmin(admin.ModelAdmin):
-    list_display = ('id', 'indicateur', 'poids_pourcentage')
-    def indicateur(self, obj):
-        return obj.id_indicateur_se.nom_indicateur
-    indicateur.short_description = 'Critère SE'
-
-
-@admin.register(EvaluationSEDetail)
-class EvaluationSEDetailAdmin(admin.ModelAdmin):
-    list_display = ('id', 'evaluation', 'indicateur', 'note')
-    def evaluation(self, obj):
-        return f"Éval #{obj.id_evaluation.id}"
-    def indicateur(self, obj):
-        return obj.id_se.id_indicateur_se.nom_indicateur
