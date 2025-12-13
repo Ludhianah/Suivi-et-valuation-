@@ -1,8 +1,5 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db.models.signals import post_save, post_delete
-from django.dispatch import receiver
-
 
 # ===============================
 # 🔹 MODÈLE: INDICATEUR SAVOIR-FAIRE (SF)
@@ -24,39 +21,6 @@ class IndicateurSF(models.Model):
 
 
 # ===============================
-# 🔹 MODÈLE: SAVOIR-FAIRE (lié au département)
-# ===============================
-class SavoirFaire(models.Model):
-    id_departement = models.ForeignKey(
-        'employees.Departement',
-        on_delete=models.CASCADE,
-        related_name='savoir_faire',
-        db_column='id_departement'
-    )
-    id_indicateur_sf = models.ForeignKey(
-        IndicateurSF,
-        on_delete=models.CASCADE,
-        related_name='savoir_faire',
-        db_column='id_indicateur_sf'
-    )
-    objectif = models.CharField(max_length=255, blank=True, null=True, verbose_name="Objectif")
-    poids_pourcentage = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text="Poids en % (ex: 30 pour 30%)"
-    )
-    date_creation = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'savoir_faire'
-        unique_together = ['id_departement', 'id_indicateur_sf']
-
-    def __str__(self):
-        return f"{self.id_departement.nom_departement} - {self.id_indicateur_sf.nom_indicateur}"
-
-
-# ===============================
 # 🔹 MODÈLE: INDICATEUR SAVOIR-ÊTRE (SE)
 # ===============================
 class IndicateurSE(models.Model):
@@ -73,6 +37,40 @@ class IndicateurSE(models.Model):
 
 
 # ===============================
+# 🔹 MODÈLE: SAVOIR-FAIRE
+# ===============================
+class SavoirFaire(models.Model):
+    id_service = models.ForeignKey(
+        'employees.Service',  # renommé Service
+        on_delete=models.CASCADE,
+        related_name='savoir_faire',
+        db_column='id_service'
+    )
+    id_indicateur_sf = models.ForeignKey(
+        IndicateurSF,
+        on_delete=models.CASCADE,
+        related_name='savoir_faire',
+        db_column='id_indicateur_sf'
+    )
+    objectif = models.DecimalField(
+        max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Objectif"
+    )
+    poids_pourcentage = models.DecimalField(
+        max_digits=5, decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text="Poids en % (ex: 30 pour 30%)"
+    )
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'savoir_faire'
+        unique_together = ['id_service', 'id_indicateur_sf']
+
+    def __str__(self):
+        return f"{self.id_service.nom_service} - {self.id_indicateur_sf.nom_indicateur}"
+
+
+# ===============================
 # 🔹 MODÈLE: SAVOIR-ÊTRE
 # ===============================
 class SavoirEtre(models.Model):
@@ -83,8 +81,7 @@ class SavoirEtre(models.Model):
         db_column='id_indicateur_se'
     )
     poids_pourcentage = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
+        max_digits=5, decimal_places=2,
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text="Poids en % (ex: 20 pour 20%)"
     )
@@ -98,72 +95,7 @@ class SavoirEtre(models.Model):
 
 
 # ===============================
-# 🔹 MODÈLE: DÉTAIL SAVOIR-FAIRE
-# (⚠️ Clé étrangère vers Evaluation supprimée)
-# ===============================
-class EvaluationSFDetail(models.Model):
-    id_sf = models.ForeignKey(
-        SavoirFaire,
-        on_delete=models.CASCADE,
-        related_name='details_sf',
-        db_column='id_sf'
-    )
-    note = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        verbose_name="Note /10"
-    )
-    commentaire = models.TextField(blank=True, null=True)
-    date_creation = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'evaluation_sf_detail'
-
-    def __str__(self):
-        return f"{self.id_sf.id_indicateur_sf.nom_indicateur}: {self.note}/10"
-
-    @property
-    def note_ponderee(self):
-        """Calcule la note pondérée selon le poids du savoir-faire."""
-        return (float(self.note) * float(self.id_sf.poids_pourcentage)) / 100
-
-
-# ===============================
-# 🔹 MODÈLE: DÉTAIL SAVOIR-ÊTRE
-# (⚠️ Clé étrangère vers Evaluation supprimée)
-# ===============================
-class EvaluationSEDetail(models.Model):
-    id_se = models.ForeignKey(
-        SavoirEtre,
-        on_delete=models.CASCADE,
-        related_name='details_se',
-        db_column='id_se'
-    )
-    note = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        verbose_name="Note /10"
-    )
-    commentaire = models.TextField(blank=True, null=True)
-    date_creation = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'evaluation_se_detail'
-
-    def __str__(self):
-        return f"{self.id_se.id_indicateur_se.nom_indicateur}: {self.note}/10"
-
-    @property
-    def note_ponderee(self):
-        """Calcule la note pondérée selon le poids du savoir-être."""
-        return (float(self.note) * float(self.id_se.poids_pourcentage)) / 100
-
-
-# ===============================
 # 🔹 MODÈLE: ÉVALUATION MENSUELLE
-# (✅ Ajout des ForeignKey vers SE et SF Détail)
 # ===============================
 class Evaluation(models.Model):
     MOIS_CHOICES = [
@@ -178,57 +110,47 @@ class Evaluation(models.Model):
         related_name='evaluations',
         db_column='id_employe'
     )
-    annee = models.IntegerField(verbose_name="Année")
-    mois = models.IntegerField(choices=MOIS_CHOICES, verbose_name="Mois")
-    
-    # 🔸 Nouvelles relations 1-1 vers les détails
-    id_detail_se = models.OneToOneField(
-        EvaluationSEDetail,
+    id_indicateur = models.ForeignKey(
+        IndicateurSF,  # tu peux changer en IndicateurSE si nécessaire
         on_delete=models.CASCADE,
-        related_name='evaluation_se',
-        null=True,
-        blank=True
+        related_name='evaluations',
+        db_column='id_indicateur',
+        default=1  # ⚡ Défini un indicateur SF par défaut pour les lignes existantes
     )
-    
-    id_detail_sf = models.OneToOneField(
-        EvaluationSFDetail,
+    id_service = models.ForeignKey(
+        'employees.Service',  # renommé Service
         on_delete=models.CASCADE,
-        related_name='evaluation_sf',
-        null=True,
-        blank=True
+        related_name='evaluations',
+        db_column='id_service'
     )
 
-    note_sf = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        verbose_name="Note Savoir-Faire"
+    annee = models.IntegerField(verbose_name="Année")
+    mois = models.IntegerField(choices=MOIS_CHOICES, verbose_name="Mois")
+    objectif = models.DecimalField(max_digits=10, decimal_places=2)
+    realisation = models.DecimalField(max_digits=10, decimal_places=2)
+
+    note_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True, verbose_name="Note (%)"
     )
-    note_se = models.DecimalField(
-        max_digits=5,
-        decimal_places=2,
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(10)],
-        verbose_name="Note Savoir-Être"
+    note_sur_20 = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True, verbose_name="Note /20"
     )
+
     commentaire = models.TextField(blank=True, null=True)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'evaluation'
-        unique_together = ['id_employe', 'annee', 'mois']
+        unique_together = ['id_employe', 'id_indicateur', 'annee', 'mois']
         ordering = ['-annee', '-mois']
 
     def __str__(self):
         return f"{self.id_employe} - {self.get_mois_display()} {self.annee}"
 
-    @property
-    def note_globale(self):
-        """Calcule la moyenne des deux notes SE et SF."""
-        if self.note_sf is not None and self.note_se is not None:
-            return (float(self.note_sf) + float(self.note_se)) / 2
-        return None
+    def save(self, *args, **kwargs):
+        # 🔹 Calcul automatique de la note
+        if self.objectif and self.realisation is not None:
+            self.note_percent = (self.realisation / self.objectif) * 100
+            self.note_sur_20 = (self.note_percent / 100) * 20
+        super().save(*args, **kwargs)

@@ -4,21 +4,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
-# Import des modèles
-from .models import (
-    IndicateurSF, SavoirFaire, IndicateurSE, SavoirEtre,
-    Evaluation, EvaluationSFDetail, EvaluationSEDetail
-)
-
-# Import des sérialiseurs
+from .models import IndicateurSF, SavoirFaire, IndicateurSE, SavoirEtre, Evaluation
 from .serializers import (
-    IndicateurSFSerializer, SavoirFaireSerializer, IndicateurSESerializer, SavoirEtreSerializer,
-    EvaluationSerializer, EvaluationSFDetailSerializer, EvaluationSEDetailSerializer
+    IndicateurSFSerializer,
+    SavoirFaireSerializer,
+    IndicateurSESerializer,
+    SavoirEtreSerializer,
+    EvaluationSerializer
 )
 
-# =============================================================================
-# INDICATEUR SAVOIR-FAIRE (IndicateurSF)
-# =============================================================================
+
+# =========================================
+# INDICATEUR SAVOIR-FAIRE (SF)
+# =========================================
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def indicateur_sf_api(request, pk=None):
@@ -27,30 +25,26 @@ def indicateur_sf_api(request, pk=None):
             try:
                 obj = IndicateurSF.objects.get(pk=pk)
                 serializer = IndicateurSFSerializer(obj)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data)
             except IndicateurSF.DoesNotExist:
                 return Response({"detail": "IndicateurSF non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        qs = IndicateurSF.objects.all()
+        serializer = IndicateurSFSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    elif request.method in ['POST', 'PUT', 'PATCH']:
+        if pk:
+            try:
+                obj = IndicateurSF.objects.get(pk=pk)
+            except IndicateurSF.DoesNotExist:
+                return Response({"detail": "IndicateurSF non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+            serializer = IndicateurSFSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
         else:
-            qs = IndicateurSF.objects.all()
-            serializer = IndicateurSFSerializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = IndicateurSFSerializer(data=request.data)
 
-    elif request.method == 'POST':
-        serializer = IndicateurSFSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method in ['PUT', 'PATCH']:
-        try:
-            obj = IndicateurSF.objects.get(pk=pk)
-        except IndicateurSF.DoesNotExist:
-            return Response({"detail": "IndicateurSF non trouvé."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = IndicateurSFSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
@@ -61,41 +55,38 @@ def indicateur_sf_api(request, pk=None):
         except IndicateurSF.DoesNotExist:
             return Response({"detail": "IndicateurSF non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
-# =============================================================================
+
+# =========================================
 # SAVOIR-FAIRE (SavoirFaire)
-# =============================================================================
+# =========================================
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def savoir_faire_api(request, pk=None):
     if request.method == 'GET':
         if pk:
             try:
-                obj = SavoirFaire.objects.select_related('id_departement', 'id_indicateur_sf').get(pk=pk)
+                obj = SavoirFaire.objects.select_related('id_service', 'id_indicateur_sf').get(pk=pk)
                 serializer = SavoirFaireSerializer(obj)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data)
             except SavoirFaire.DoesNotExist:
                 return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        qs = SavoirFaire.objects.select_related('id_service', 'id_indicateur_sf').all()
+        serializer = SavoirFaireSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    elif request.method in ['POST', 'PUT', 'PATCH']:
+        if pk:
+            try:
+                obj = SavoirFaire.objects.get(pk=pk)
+            except SavoirFaire.DoesNotExist:
+                return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+            serializer = SavoirFaireSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
         else:
-            qs = SavoirFaire.objects.select_related('id_departement', 'id_indicateur_sf').all()
-            serializer = SavoirFaireSerializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = SavoirFaireSerializer(data=request.data)
 
-    elif request.method == 'POST':
-        serializer = SavoirFaireSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method in ['PUT', 'PATCH']:
-        try:
-            obj = SavoirFaire.objects.get(pk=pk)
-        except SavoirFaire.DoesNotExist:
-            return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = SavoirFaireSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
@@ -107,9 +98,9 @@ def savoir_faire_api(request, pk=None):
             return Response({"detail": "SavoirFaire non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
 
-# =============================================================================
-# INDICATEUR SAVOIR-ÊTRE (IndicateurSE)
-# =============================================================================
+# =========================================
+# INDICATEUR SAVOIR-ÊTRE (SE)
+# =========================================
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def indicateur_se_api(request, pk=None):
@@ -118,30 +109,26 @@ def indicateur_se_api(request, pk=None):
             try:
                 obj = IndicateurSE.objects.get(pk=pk)
                 serializer = IndicateurSESerializer(obj)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data)
             except IndicateurSE.DoesNotExist:
                 return Response({"detail": "IndicateurSE non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        qs = IndicateurSE.objects.all()
+        serializer = IndicateurSESerializer(qs, many=True)
+        return Response(serializer.data)
+
+    elif request.method in ['POST', 'PUT', 'PATCH']:
+        if pk:
+            try:
+                obj = IndicateurSE.objects.get(pk=pk)
+            except IndicateurSE.DoesNotExist:
+                return Response({"detail": "IndicateurSE non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+            serializer = IndicateurSESerializer(obj, data=request.data, partial=(request.method=='PATCH'))
         else:
-            qs = IndicateurSE.objects.all()
-            serializer = IndicateurSESerializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = IndicateurSESerializer(data=request.data)
 
-    elif request.method == 'POST':
-        serializer = IndicateurSESerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method in ['PUT', 'PATCH']:
-        try:
-            obj = IndicateurSE.objects.get(pk=pk)
-        except IndicateurSE.DoesNotExist:
-            return Response({"detail": "IndicateurSE non trouvé."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = IndicateurSESerializer(obj, data=request.data, partial=(request.method=='PATCH'))
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
@@ -152,9 +139,10 @@ def indicateur_se_api(request, pk=None):
         except IndicateurSE.DoesNotExist:
             return Response({"detail": "IndicateurSE non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
-# =============================================================================
+
+# =========================================
 # SAVOIR-ÊTRE (SavoirEtre)
-# =============================================================================
+# =========================================
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 def savoir_etre_api(request, pk=None):
@@ -163,30 +151,26 @@ def savoir_etre_api(request, pk=None):
             try:
                 obj = SavoirEtre.objects.select_related('id_indicateur_se').get(pk=pk)
                 serializer = SavoirEtreSerializer(obj)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data)
             except SavoirEtre.DoesNotExist:
                 return Response({"detail": "SavoirEtre non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+        qs = SavoirEtre.objects.select_related('id_indicateur_se').all()
+        serializer = SavoirEtreSerializer(qs, many=True)
+        return Response(serializer.data)
+
+    elif request.method in ['POST', 'PUT', 'PATCH']:
+        if pk:
+            try:
+                obj = SavoirEtre.objects.get(pk=pk)
+            except SavoirEtre.DoesNotExist:
+                return Response({"detail": "SavoirEtre non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+            serializer = SavoirEtreSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
         else:
-            qs = SavoirEtre.objects.select_related('id_indicateur_se').all()
-            serializer = SavoirEtreSerializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = SavoirEtreSerializer(data=request.data)
 
-    elif request.method == 'POST':
-        serializer = SavoirEtreSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method in ['PUT', 'PATCH']:
-        try:
-            obj = SavoirEtre.objects.get(pk=pk)
-        except SavoirEtre.DoesNotExist:
-            return Response({"detail": "SavoirEtre non trouvé."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = SavoirEtreSerializer(obj, data=request.data, partial=(request.method=='PATCH'))
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
@@ -198,159 +182,39 @@ def savoir_etre_api(request, pk=None):
             return Response({"detail": "SavoirEtre non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
 
-# =============================================================================
-# ÉVALUATION GÉNÉRALE (Evaluation)
-# =============================================================================
+# =========================================
+# ÉVALUATION (calcul automatique)
+# =========================================
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def evaluation_api(request, pk=None):
-    """
-    API principale pour les évaluations.
-    Utilise prefetch_related pour charger les détails liés efficacement.
-    """
     if request.method == 'GET':
         if pk:
             try:
-                obj = Evaluation.objects.select_related('id_employe').prefetch_related('id_detail_sf', 'id_detail_se').get(pk=pk)              
+                obj = Evaluation.objects.select_related('id_employe').get(pk=pk)
                 serializer = EvaluationSerializer(obj)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data)
             except Evaluation.DoesNotExist:
-                return Response(
-                    {"detail": "Évaluation non trouvée."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        else:
-            qs = Evaluation.objects.select_related('id_employe') \
-                .prefetch_related('id_detail_sf', 'id_detail_se').all()
-            serializer = EvaluationSerializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response({"detail": "Évaluation non trouvée."}, status=status.HTTP_404_NOT_FOUND)
+        qs = Evaluation.objects.select_related('id_employe').all()
+        serializer = EvaluationSerializer(qs, many=True)
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        serializer = EvaluationSerializer(data=request.data)
+        data = request.data.copy()
+        try:
+            objectif = float(data.get('objectif'))
+            realisation = float(data.get('realisation'))
+            note_percent = (realisation / objectif) * 100 if objectif != 0 else 0
+            note_sur_20 = (note_percent / 100) * 20
+        except (TypeError, ValueError):
+            return Response({"detail": "Objectif et Réalisation doivent être des nombres."}, status=status.HTTP_400_BAD_REQUEST)
+
+        data['note_sur_20'] = round(note_sur_20, 2)
+        data['note_percent'] = round(note_percent, 2)
+
+        serializer = EvaluationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# =============================================================================
-# DÉTAIL ÉVALUATION SAVOIR-FAIRE (EvaluationSFDetail)
-# =============================================================================
-@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
-@permission_classes([AllowAny])
-def evaluation_sf_detail_api(request, pk=None):
-    """
-    API complète CRUD pour les détails d'évaluation SF.
-    Supporte mise à jour partielle (PATCH).
-    """
-    if request.method == 'GET':
-        if pk:
-            try:
-                obj = EvaluationSFDetail.objects.select_related('id_sf').get(pk=pk)
-                serializer = EvaluationSFDetailSerializer(obj)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except EvaluationSFDetail.DoesNotExist:
-                return Response(
-                    {"detail": "Détail SF non trouvé."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        else:
-            qs = EvaluationSFDetail.objects.select_related('id_sf').all()
-            serializer = EvaluationSFDetailSerializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-    elif request.method == 'POST':
-        serializer = EvaluationSFDetailSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method in ['PUT', 'PATCH']:
-        # Mise à jour complète (PUT) ou partielle (PATCH)
-        try:
-            obj = EvaluationSFDetail.objects.get(pk=pk)
-        except EvaluationSFDetail.DoesNotExist:
-            return Response(
-                {"detail": "Détail SF non trouvé."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        serializer = EvaluationSFDetailSerializer(
-            obj, data=request.data, partial=(request.method == 'PATCH')
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        try:
-            obj = EvaluationSFDetail.objects.get(pk=pk)
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except EvaluationSFDetail.DoesNotExist:
-            return Response(
-                {"detail": "Détail SF non trouvé."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-
-# =============================================================================
-# DÉTAIL ÉVALUATION SAVOIR-ÊTRE (EvaluationSEDetail)
-# =============================================================================
-@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
-@permission_classes([AllowAny])
-def evaluation_se_detail_api(request, pk=None):
-    """
-    API CRUD complète pour les détails d'évaluation SE.
-    Identique à EvaluationSFDetail.
-    """
-    if request.method == 'GET':
-        if pk:
-            try:
-                obj = EvaluationSEDetail.objects.select_related('id_se').get(pk=pk)
-                serializer = EvaluationSEDetailSerializer(obj)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except EvaluationSEDetail.DoesNotExist:
-                return Response(
-                    {"detail": "Détail SE non trouvé."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        else:
-            qs = EvaluationSEDetail.objects.select_related('id_se').all()
-            serializer = EvaluationSEDetailSerializer(qs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
-    elif request.method == 'POST':
-        serializer = EvaluationSEDetailSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method in ['PUT', 'PATCH']:
-        try:
-            obj = EvaluationSEDetail.objects.get(pk=pk)
-        except EvaluationSEDetail.DoesNotExist:
-            return Response(
-                {"detail": "Détail SE non trouvé."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        serializer = EvaluationSEDetailSerializer(
-            obj, data=request.data, partial=(request.method == 'PATCH')
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
-        try:
-            obj = EvaluationSEDetail.objects.get(pk=pk)
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except EvaluationSEDetail.DoesNotExist:
-            return Response(
-                {"detail": "Détail SE non trouvé."},
-                status=status.HTTP_404_NOT_FOUND
-            )
